@@ -1,0 +1,23 @@
+// ==============  BEER ENDPOINTS  ============== //
+GET /beers
+GET /beers/:id
+GET /beers?:status
+GET /beers?:featured
+
+POST /beers
+
+PUT/PATCH /beers/:id
+
+DELETE /beers/:id
+
+// ==============  BREWER ENDPOINTS  ============== //
+
+GET /brewers
+GET /brewers/:id
+GET /brewers?:featured
+
+POST /brewers
+
+PUT/PATCH /brewers/:id
+
+DELETE /brewers/:id

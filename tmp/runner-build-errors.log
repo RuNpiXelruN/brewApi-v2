@@ -1,0 +1,3 @@
+# go_apps/go_api_apps/brewApi-v2/config
+config/config.go:22:2: undefined: model.SetDatabase
+config/config.go:23:2: undefined: model.SyncTables
