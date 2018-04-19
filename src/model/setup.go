@@ -1,6 +1,10 @@
 package model
 
-import "github.com/jinzhu/gorm"
+import (
+	"fmt"
+
+	"github.com/jinzhu/gorm"
+)
 
 func SetDatabase(database *gorm.DB) {
 	db = database
@@ -9,4 +13,10 @@ func SetDatabase(database *gorm.DB) {
 func SeedDatabase(db *gorm.DB) {
 	migrateDB()
 	seedAll()
+	fmt.Println("Seed running")
+}
+
+func RunMigrations(db *gorm.DB) {
+	migrateDB()
+	fmt.Println("Migration running")
 }
