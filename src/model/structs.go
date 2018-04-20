@@ -2,10 +2,12 @@ package model
 
 import "time"
 
+// Beer struct
 type Beer struct {
 	ID             uint       `json:"id"`
 	Name           string     `json:"name" gorm:"not null;" sql:"unique"`
 	Description    string     `json:"description" sql:"default:'A default beer description here'"`
+	Status         string     `json:"status" sql:"default:'upcoming'"`
 	ImageURL       string     `json:"image_url;" sql:"default:'https://placeimg.com/180/400/any'"`
 	AlcoholContent float64    `json:"alcohol_content;" sql:"default:4.44"`
 	Featured       bool       `json:"featured;" sql:"default:false"`
@@ -15,6 +17,7 @@ type Beer struct {
 	DeletedAt      *time.Time `json:"deleted_at"`
 }
 
+// Brewer struct
 type Brewer struct {
 	ID        uint       `json:"id"`
 	FirstName string     `json:"first_name"`
@@ -27,6 +30,7 @@ type Brewer struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
+// Rank struct
 type Rank struct {
 	ID        uint       `json:"id"`
 	Name      string     `json:"name" gorm:"not null;" sql:"unique"`

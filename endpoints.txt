@@ -1,14 +1,15 @@
 // ==============  BEER ENDPOINTS  ============== //
-GET /beers
-GET /beers/:id
-GET /beers?:status
-GET /beers?:featured
 
-POST /beers
+GET /beers              --- COMPLETE ---
+GET /beers/:id          --- COMPLETE ---
+GET /beers?:status      --- COMPLETE ---
+GET /beers?:featured    --- COMPLETE ---
+
+POST /beers             --- COMPLETE ---
 
 PUT/PATCH /beers/:id
 
-DELETE /beers/:id
+DELETE /beers/:id       --- COMPLETE ---
 
 // ==============  BREWER ENDPOINTS  ============== //
 

@@ -6,10 +6,11 @@ type Result struct {
 }
 
 type Success struct {
-	Data   interface{} `json:"data"`
 	Status int         `json:"status"`
+	Data   interface{} `json:"data"`
 }
 
 type Error struct {
-	Status int `json:"status"`
+	Status     int    `json:"status"`
+	StatusText string `json:"status_text"`
 }
