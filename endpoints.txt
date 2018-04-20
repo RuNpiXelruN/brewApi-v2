@@ -7,7 +7,7 @@ GET /beers?:featured    --- COMPLETE ---
 
 POST /beers             --- COMPLETE ---
 
-PUT/PATCH /beers/:id
+PUT/PATCH /beers/:id    --- COMPLETE ---
 
 DELETE /beers/:id       --- COMPLETE ---
 
