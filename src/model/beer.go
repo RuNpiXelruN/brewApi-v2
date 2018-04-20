@@ -10,6 +10,30 @@ import (
 
 var result utils.Result
 
+// UpdateBeer func
+func UpdateBeer(id, name, desc, stat, alc, feat, brewIDs string) *utils.Result {
+	bIDs := strings.Split(brewIDs, ",")
+	brewers := []Brewer{}
+	db.Model(&Brewer{}).Where("id in (?)", bIDs).Find(&brewers)
+
+	beer := Beer{}
+
+	db.Model(&Beer{}).Preload("Brewers").Where("id = ?", id).Assign(map[string]interface{}{
+		"name": name,
+		"desc": desc,
+		"stat": stat,
+		"alc":  alc,
+		"feat": feat,
+	}).FirstOrCreate(&beer).Association("Brewers").Replace(&brewers)
+
+	result.Success = &utils.Success{
+		Status: http.StatusOK,
+		Data:   &beer,
+	}
+
+	return &result
+}
+
 // GetBeersWithStatus func
 func GetBeersWithStatus(status string) *utils.Result {
 	beers := []Beer{}
