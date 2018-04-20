@@ -12,7 +12,9 @@ func seedAll() {
 func seedBeersBrewersRanks() {
 	beers := []Beer{
 		Beer{
-			Name: "Apricot Wheat Beer",
+			Name:     "Apricot Wheat Beer",
+			Status:   "upcoming",
+			Featured: true,
 			Brewers: []Brewer{
 				Brewer{
 					FirstName: "justin",
@@ -35,7 +37,9 @@ func seedBeersBrewersRanks() {
 			},
 		},
 		Beer{
-			Name: "Pineapple Pale Ale",
+			Name:     "Pineapple Pale Ale",
+			Status:   "brewing",
+			Featured: false,
 			Brewers: []Brewer{
 				Brewer{
 					FirstName: "sawyer",
@@ -58,7 +62,9 @@ func seedBeersBrewersRanks() {
 			},
 		},
 		Beer{
-			Name: "Rice to Meet You",
+			Name:     "Rice to Meet You",
+			Status:   "active-full",
+			Featured: false,
 			Brewers: []Brewer{
 				Brewer{
 					FirstName: "pete",
@@ -81,7 +87,9 @@ func seedBeersBrewersRanks() {
 			},
 		},
 		Beer{
-			Name: "Redfern Imperial IPA",
+			Name:     "Redfern Imperial IPA",
+			Status:   "past",
+			Featured: false,
 			Brewers: []Brewer{
 				Brewer{
 					FirstName: "michael",

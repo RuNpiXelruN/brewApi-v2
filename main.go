@@ -45,5 +45,5 @@ func main() {
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("Index hit!")
+	fmt.Fprint(w, "Index Hit")
 }
