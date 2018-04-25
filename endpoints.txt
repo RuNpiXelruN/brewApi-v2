@@ -13,12 +13,13 @@ DELETE /beers/:id       --- COMPLETE ---
 
 // ==============  BREWER ENDPOINTS  ============== //
 
-GET /brewers
-GET /brewers/:id
-GET /brewers?:featured
+GET /brewers            --- COMPLETE ---
+GET /brewers/:id        --- COMPLETE ---
+GET /brewers?:featured  --- COMPLETE ---
+GET /brewers?:rank      --- COMPLETE ---
 
-POST /brewers
+POST /brewers           --- COMPLETE ---
 
-PUT/PATCH /brewers/:id
+PUT/PATCH /brewers/:id  --- COMPLETE ---
 
-DELETE /brewers/:id
+DELETE /brewers/:id     --- COMPLETE ---
