@@ -11,20 +11,56 @@ import (
 var result utils.Result
 
 // UpdateBeer func
-func UpdateBeer(id, name, desc, stat, alc, feat, brewIDs string) *utils.Result {
-	bIDs := strings.Split(brewIDs, ",")
-	brewers := []Brewer{}
-	db.Model(&Brewer{}).Where("id in (?)", bIDs).Find(&brewers)
+func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs string) *utils.Result {
+	feat, _ := strconv.ParseBool(ft)
+	alcInt, _ := strconv.ParseFloat(alc, 64)
+	var bIDs []string
+	var brewers []Brewer
 
 	beer := Beer{}
+	err := db.Model(&Beer{}).Preload("Brewers").Where("id = ?", id).Find(&beer).Error
+	if err != nil {
+		result.Error = &utils.Error{
+			Status:     http.StatusNotFound,
+			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching beer from DB",
+		}
+		return &result
+	}
 
-	db.Model(&Beer{}).Preload("Brewers").Where("id = ?", id).Assign(map[string]interface{}{
-		"name": name,
-		"desc": desc,
-		"stat": stat,
-		"alc":  alc,
-		"feat": feat,
-	}).FirstOrCreate(&beer).Association("Brewers").Replace(&brewers)
+	err = db.Model(&beer).Updates(&Beer{
+		Name:           name,
+		Description:    desc,
+		Status:         stat,
+		AlcoholContent: alcInt,
+		Featured:       feat,
+	}).Error
+
+	if err != nil {
+		result.Error = &utils.Error{
+			Status:     http.StatusInternalServerError,
+			StatusText: http.StatusText(http.StatusInternalServerError) + " - Error updating beer in DB",
+		}
+		return &result
+	}
+
+	if len(brewIDs) > 0 {
+		bIDs = strings.Split(brewIDs, ",")
+		if err := db.Model(&Brewer{}).Where("id in (?)", bIDs).Find(&brewers).Error; err != nil {
+			result.Error = &utils.Error{
+				Status:     http.StatusInternalServerError,
+				StatusText: http.StatusText(http.StatusInternalServerError) + " - Error fetching brewers from DB",
+			}
+			return &result
+		}
+
+		if err := db.Model(&beer).Association("Brewers").Replace(&brewers).Error; err != nil {
+			result.Error = &utils.Error{
+				Status:     http.StatusInternalServerError,
+				StatusText: http.StatusText(http.StatusInternalServerError) + " - Error replacing beers brewers in DB",
+			}
+			return &result
+		}
+	}
 
 	result.Success = &utils.Success{
 		Status: http.StatusOK,
