@@ -18,6 +18,7 @@ func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs string) *utils.Result {
 	var brewers []Brewer
 
 	beer := Beer{}
+
 	err := db.Model(&Beer{}).Preload("Brewers").Where("id = ?", id).Find(&beer).Error
 	if err != nil {
 		result.Error = &utils.Error{
@@ -32,7 +33,6 @@ func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs string) *utils.Result {
 		Description:    desc,
 		Status:         stat,
 		AlcoholContent: alcInt,
-		Featured:       feat,
 	}).Error
 
 	if err != nil {
@@ -60,6 +60,14 @@ func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs string) *utils.Result {
 			}
 			return &result
 		}
+	}
+
+	if err := db.Model(&beer).Update("featured", feat).Error; err != nil {
+		result.Error = &utils.Error{
+			Status:     http.StatusInternalServerError,
+			StatusText: http.StatusText(http.StatusInternalServerError) + " - Error updating featured status in DB",
+		}
+		return &result
 	}
 
 	result.Success = &utils.Success{

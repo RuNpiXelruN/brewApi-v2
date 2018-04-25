@@ -26,7 +26,6 @@ func UpdateBrewer(id, f, l, ft, rnk, beerIDs string) *utils.Result {
 	err := db.Model(&brewer).Updates(&Brewer{
 		FirstName: f,
 		LastName:  l,
-		Featured:  feat,
 	}).Error
 
 	if err != nil {
@@ -73,6 +72,14 @@ func UpdateBrewer(id, f, l, ft, rnk, beerIDs string) *utils.Result {
 			}
 			return &result
 		}
+	}
+
+	if err := db.Model(&brewer).Update("featured", feat).Error; err != nil {
+		result.Error = &utils.Error{
+			Status:     http.StatusInternalServerError,
+			StatusText: http.StatusText(http.StatusInternalServerError) + " - Error updating featured status in DB",
+		}
+		return &result
 	}
 
 	result.Success = &utils.Success{
