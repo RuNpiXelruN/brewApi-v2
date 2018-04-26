@@ -14,7 +14,7 @@ func (b brewer) registerRoutes(r *mux.Router) {
 	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.deleteBrewer).Methods("DELETE")
 	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.updateBrewer).Methods("PUT", "PATCH")
 	r.Path("/brewers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBrewers).Methods("GET")
-	r.Path("/brewers").Queries("rank", "{rank:[0-8]}").HandlerFunc(b.getRankedBrewers).Methods("GET")
+	r.Path("/brewers").Queries("rank", "{rank:[1-8]}").HandlerFunc(b.getRankedBrewers).Methods("GET")
 	r.Path("/brewers").HandlerFunc(b.getBrewers).Methods("GET")
 	r.Path("/brewers").HandlerFunc(b.createBrewer).Methods("POST")
 }
