@@ -1,25 +1,30 @@
 // ==============  BEER ENDPOINTS  ============== //
 
-GET /beers              --- COMPLETE ---
-GET /beers/:id          --- COMPLETE ---
-GET /beers?:status      --- COMPLETE ---
-GET /beers?:featured    --- COMPLETE ---
+GET /beers ?:(|limit|order|offset)      --- COMPLETE ---
+GET /beers/:id                          --- COMPLETE ---
+GET /beers?:status                      --- COMPLETE ---
+GET /beers?:featured                    --- COMPLETE ---
 
-POST /beers             --- COMPLETE ---
+POST /beers                             --- COMPLETE ---
 
-PUT/PATCH /beers/:id    --- COMPLETE ---
+PUT/PATCH /beers/:id                    --- COMPLETE ---
 
-DELETE /beers/:id       --- COMPLETE ---
+DELETE /beers/:id                       --- COMPLETE ---
 
 // ==============  BREWER ENDPOINTS  ============== //
 
-GET /brewers            --- COMPLETE ---
-GET /brewers/:id        --- COMPLETE ---
-GET /brewers?:featured  --- COMPLETE ---
-GET /brewers?:rank      --- COMPLETE ---
+GET /brewers ?:(|limit|order|offset)    --- COMPLETE ---
+GET /brewers/:id                        --- COMPLETE ---
+GET /brewers?:featured                  --- COMPLETE ---
+GET /brewers?:rank                      --- COMPLETE ---
 
-POST /brewers           --- COMPLETE ---
+POST /brewers                           --- COMPLETE ---
 
-PUT/PATCH /brewers/:id  --- COMPLETE ---
+PUT/PATCH /brewers/:id                  --- COMPLETE ---
 
-DELETE /brewers/:id     --- COMPLETE ---
+DELETE /brewers/:id                     --- COMPLETE ---
+
+// ==============  RANK ENDPOINTS  ============== //
+
+GET /ranks ?:(limit|order|offset)       --- COMPLETE ---
+GET /rank ?:(level)                     --- COMPLETE ---

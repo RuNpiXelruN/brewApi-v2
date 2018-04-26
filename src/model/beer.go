@@ -19,7 +19,7 @@ func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs string) *utils.Result {
 
 	beer := Beer{}
 
-	err := db.Model(&Beer{}).Preload("Brewers").Where("id = ?", id).Find(&beer).Error
+	err := db.Model(&Beer{}).Preload("Brewers.Rank").Where("id = ?", id).Find(&beer).Error
 	if err != nil {
 		result.Error = &utils.Error{
 			Status:     http.StatusNotFound,
@@ -82,7 +82,7 @@ func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs string) *utils.Result {
 func GetBeersWithStatus(status string) *utils.Result {
 	beers := []Beer{}
 
-	if err := db.Model(&Beer{}).Preload("Brewers").Where("status LIKE ?", status+"%").Find(&beers).Error; err != nil {
+	if err := db.Model(&Beer{}).Preload("Brewers.Rank").Where("status LIKE ?", status+"%").Find(&beers).Error; err != nil {
 		result.Error = &utils.Error{
 			Status:     http.StatusNotFound,
 			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching beers from DB",
@@ -100,7 +100,7 @@ func GetBeersWithStatus(status string) *utils.Result {
 func GetFeaturedBeers(feat string) *utils.Result {
 	beers := []Beer{}
 
-	if err := db.Model(&Beer{}).Preload("Brewers").Where("featured = ?", feat).Find(&beers).Error; err != nil {
+	if err := db.Model(&Beer{}).Preload("Brewers.Rank").Where("featured = ?", feat).Find(&beers).Error; err != nil {
 		result.Error = &utils.Error{
 			Status:     http.StatusNotFound,
 			StatusText: http.StatusText(http.StatusNotFound) + " -Error fetching beers from DB",
@@ -189,7 +189,7 @@ func CreateBeer(name, desc, alc, feat, brewIDs string) *utils.Result {
 // GetBeer func
 func GetBeer(id string) *utils.Result {
 	beer := Beer{}
-	if err := db.Model(&Beer{}).Preload("Brewers").Where("id = ?", id).Find(&beer).Error; err != nil {
+	if err := db.Model(&Beer{}).Preload("Brewers.Rank").Where("id = ?", id).Find(&beer).Error; err != nil {
 		result.Error = &utils.Error{
 			Status:     http.StatusNotFound,
 			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching beer from DB",
@@ -207,7 +207,7 @@ func GetBeer(id string) *utils.Result {
 func GetBeers(limit, order, offset string) *utils.Result {
 	beers := []Beer{}
 
-	err := db.Model(&Beer{}).Limit(limit).Order("created_at " + order).Offset(offset).Preload("Brewers").Find(&beers).Error
+	err := db.Model(&Beer{}).Limit(limit).Order("created_at " + order).Offset(offset).Preload("Brewers.Rank").Find(&beers).Error
 	if err != nil {
 		result.Error = &utils.Error{
 			Status:     http.StatusNotFound,

@@ -24,6 +24,7 @@ type Brewer struct {
 	LastName  string     `json:"last_name"`
 	Featured  bool       `json:"featured" sql:"default:false"`
 	Rank      *Rank      `json:"rank"`
+	RankID    *uint      `json:"rank_id"`
 	Beers     []Beer     `json:"beers" gorm:"many2many:beer_brewers"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
@@ -35,7 +36,7 @@ type Rank struct {
 	ID        uint       `json:"id"`
 	Name      string     `json:"name" gorm:"not null;" sql:"unique"`
 	Level     int        `json:"level" gorm:"not null;" sql:"index:idx_rank_level; unique"`
-	BrewerID  *uint      `json:"brewer_id"`
+	Brewers   []Brewer   `json:"brewers"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at"`
