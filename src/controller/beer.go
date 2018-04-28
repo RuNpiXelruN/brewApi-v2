@@ -28,6 +28,13 @@ func (b beer) registerRoutes(r *mux.Router) {
 
 // PUT/PATCH /beers/:id
 func (b beer) updateBeer(w http.ResponseWriter, req *http.Request) {
+	var result *utils.Result
+	done := make(chan interface{})
+	defer log.Println("done cannel closed.")
+	defer close(done)
+
+	var imageURL string
+
 	vars := mux.Vars(req)
 	id := vars["id"]
 	name := req.FormValue("name")
@@ -37,7 +44,31 @@ func (b beer) updateBeer(w http.ResponseWriter, req *http.Request) {
 	feat := req.FormValue("featured")
 	brewIDs := req.FormValue("brewer_ids")
 
-	result := model.UpdateBeer(id, name, desc, stat, alc, feat, brewIDs)
+	multifile, multiheader, err := req.FormFile("image")
+	if err != nil {
+		// There is no image for the update
+		log.Println("Error getting image from request ->", err.Error())
+
+		result = model.UpdateBeer(id, name, desc, stat, alc, feat, brewIDs, imageURL)
+		Response(w, result)
+		return
+	}
+
+	s3ResultChan := utils.UploadToS3(done, multifile, multiheader)
+
+	select {
+	case s3Result := <-s3ResultChan:
+		if s3Result.Error != nil {
+			log.Println("Error uploading image to S3:", s3Result.Error.StatusText)
+			break
+		}
+		imageURL = s3Result.Success.Data.(string)
+		result = model.UpdateBeer(id, name, desc, stat, alc, feat, brewIDs, imageURL)
+		Response(w, result)
+		return
+	}
+
+	result = model.UpdateBeer(id, name, desc, stat, alc, feat, brewIDs, imageURL)
 	Response(w, result)
 }
 
