@@ -1,9 +1,12 @@
 package controller
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
 	"go_apps/go_api_apps/brewApi-v2/src/model"
+	"go_apps/go_api_apps/brewApi-v2/src/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -59,13 +62,43 @@ func (b beer) createBeerHandler(w http.ResponseWriter, req *http.Request) {
 
 	// CHECK UNIQUE NAME FUNCTION
 
+	done := make(chan interface{})
+	defer fmt.Println("done channel closed.")
+	defer close(done)
+
+	var result *utils.Result
+	var imageURL string
+
 	name := req.FormValue("name")
 	desc := req.FormValue("description")
 	alc := req.FormValue("alcohol_content")
 	feat := req.FormValue("featured")
 	brewerIDs := req.FormValue("brewer_ids")
 
-	result := model.CreateBeer(name, desc, alc, feat, brewerIDs)
+	multiFile, multiHeader, err := req.FormFile("image")
+	if err != nil {
+		log.Println("Error getting image from request ->", err.Error())
+
+		result = model.CreateBeer(name, desc, alc, feat, brewerIDs, imageURL)
+		Response(w, result)
+		return
+	}
+
+	s3ResultChan := utils.UploadToS3(done, multiFile, multiHeader)
+
+	select {
+	case s3Result := <-s3ResultChan:
+		if s3Result.Error != nil {
+			log.Println("Error uploading image to s3 ->", s3Result.Error.StatusText)
+			break
+		}
+		imageURL = s3Result.Success.Data.(string)
+		result = model.CreateBeer(name, desc, alc, feat, brewerIDs, imageURL)
+		Response(w, result)
+		return
+	}
+
+	result = model.CreateBeer(name, desc, alc, feat, brewerIDs, imageURL)
 	Response(w, result)
 }
 

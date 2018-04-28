@@ -141,7 +141,7 @@ func DeleteBeer(id string) *utils.Result {
 }
 
 // CreateBeer func
-func CreateBeer(name, desc, alc, feat, brewIDs string) *utils.Result {
+func CreateBeer(name, desc, alc, feat, brewIDs, imageURL string) *utils.Result {
 	al, _ := strconv.ParseFloat(alc, 64)
 	ft, _ := strconv.ParseBool(feat)
 
@@ -167,6 +167,7 @@ func CreateBeer(name, desc, alc, feat, brewIDs string) *utils.Result {
 		Description:    desc,
 		AlcoholContent: al,
 		Featured:       ft,
+		ImageURL:       imageURL,
 		Brewers:        brewers,
 		CreatedAt:      time.Now(),
 	}
