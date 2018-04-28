@@ -11,7 +11,7 @@ import (
 var result utils.Result
 
 // UpdateBeer func
-func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs string) *utils.Result {
+func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs, imageURL string) *utils.Result {
 	feat, _ := strconv.ParseBool(ft)
 	alcInt, _ := strconv.ParseFloat(alc, 64)
 	var bIDs []string
@@ -32,6 +32,7 @@ func UpdateBeer(id, name, desc, stat, alc, ft, brewIDs string) *utils.Result {
 		Name:           name,
 		Description:    desc,
 		Status:         stat,
+		ImageURL:       imageURL,
 		AlcoholContent: alcInt,
 	}).Error
 
