@@ -2,6 +2,7 @@ package controller
 
 import (
 	"go_apps/go_api_apps/brewApi-v2/src/model"
+	"go_apps/go_api_apps/brewApi-v2/src/utils"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -12,11 +13,11 @@ type brewer struct{}
 func (b brewer) registerRoutes(r *mux.Router) {
 	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.getBrewer).Methods("GET")
 	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.deleteBrewer).Methods("DELETE")
-	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.updateBrewer).Methods("PUT", "PATCH")
+	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.updateBrewer, model.CheckUsernameIsUnique())).Methods("PUT", "PATCH")
 	r.Path("/brewers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBrewers).Methods("GET")
 	r.Path("/brewers").Queries("rank", "{rank:[1-8]}").HandlerFunc(b.getRankedBrewers).Methods("GET")
 	r.Path("/brewers").HandlerFunc(b.getBrewers).Methods("GET")
-	r.Path("/brewers").HandlerFunc(b.createBrewer).Methods("POST")
+	r.Path("/brewers").HandlerFunc(utils.Adapt(b.createBrewer, model.CheckUsernameIsUnique())).Methods("POST")
 }
 
 // PUT/PATCH /brewers/:id
@@ -26,10 +27,11 @@ func (b brewer) updateBrewer(w http.ResponseWriter, req *http.Request) {
 	first := req.FormValue("first_name")
 	last := req.FormValue("last_name")
 	feat := req.FormValue("featured")
+	username := req.FormValue("username")
 	rank := req.FormValue("rank")
 	beerIDs := req.FormValue("beer_ids")
 
-	result := model.UpdateBrewer(id, first, last, feat, rank, beerIDs)
+	result := model.UpdateBrewer(id, first, last, feat, username, rank, beerIDs)
 	Response(w, result)
 }
 
@@ -47,10 +49,11 @@ func (b brewer) createBrewer(w http.ResponseWriter, req *http.Request) {
 	first := req.FormValue("first_name")
 	last := req.FormValue("last_name")
 	feat := req.FormValue("featured")
+	username := req.FormValue("username")
 	rank := req.FormValue("rank")
 	beerIDs := req.FormValue("beer_ids")
 
-	result := model.CreateBrewer(first, last, feat, rank, beerIDs)
+	result := model.CreateBrewer(first, last, feat, username, rank, beerIDs)
 	Response(w, result)
 }
 

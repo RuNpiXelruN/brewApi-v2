@@ -22,6 +22,7 @@ type Brewer struct {
 	ID        uint       `json:"id"`
 	FirstName string     `json:"first_name"`
 	LastName  string     `json:"last_name"`
+	Username  *string    `json:"username"`
 	Featured  bool       `json:"featured" sql:"default:false"`
 	Rank      *Rank      `json:"rank"`
 	RankID    *uint      `json:"rank_id"`
