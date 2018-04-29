@@ -8,7 +8,7 @@ import (
 )
 
 // UpdateBrewer func
-func UpdateBrewer(id, f, l, ft, rnk, beerIDs string) *utils.Result {
+func UpdateBrewer(id, f, l, ft, uname, rnk, beerIDs string) *utils.Result {
 	feat, _ := strconv.ParseBool(ft)
 	var bIDs []string
 	var rank Rank
@@ -26,6 +26,7 @@ func UpdateBrewer(id, f, l, ft, rnk, beerIDs string) *utils.Result {
 	err := db.Model(&brewer).Updates(&Brewer{
 		FirstName: f,
 		LastName:  l,
+		Username:  &uname,
 	}).Error
 
 	if err != nil {
@@ -114,8 +115,8 @@ func DeleteBrewer(id string) *utils.Result {
 	return &result
 }
 
-// CreateBrewer
-func CreateBrewer(first, last, feat, rank, beerIDs string) *utils.Result {
+// CreateBrewer func
+func CreateBrewer(first, last, feat, uname, rank, beerIDs string) *utils.Result {
 	bIDs := strings.Split(beerIDs, ",")
 	f, _ := strconv.ParseBool(feat)
 
@@ -140,6 +141,7 @@ func CreateBrewer(first, last, feat, rank, beerIDs string) *utils.Result {
 		FirstName: first,
 		LastName:  last,
 		Featured:  f,
+		Username:  &uname,
 		Rank:      &r,
 		Beers:     beers,
 	}

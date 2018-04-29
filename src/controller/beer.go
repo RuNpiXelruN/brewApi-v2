@@ -14,17 +14,14 @@ import (
 type beer struct{}
 
 func (b beer) registerRoutes(r *mux.Router) {
-	r.Path("/beers/{id:[0-9]+}").HandlerFunc(b.getBeer).Methods("GET")
-	r.Path("/beers/{id:[0-9]+}").HandlerFunc(b.updateBeer).Methods("PUT", "PATCH")
+	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.getBeer)).Methods("GET")
+	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.updateBeer, model.CheckBeerNameIsUnique())).Methods("PUT", "PATCH")
 	r.Path("/beers/{id:[0-9]+}").HandlerFunc(b.deleteBeer).Methods("DELETE")
 	r.Path("/beers").Queries("status", "{status:(?:upcoming|brewing|active-full|active-empty|past)}").HandlerFunc(b.getStatusBeers).Methods("GET")
 	r.Path("/beers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBeers).Methods("GET")
-	r.Path("/beers").HandlerFunc(b.getBeersHandler).Methods("GET")
-	r.Path("/beers").HandlerFunc(b.createBeerHandler).Methods("POST")
+	r.Path("/beers").HandlerFunc(utils.Adapt(b.getBeersHandler, model.SayHi(), utils.SayHi())).Methods("GET")
+	r.Path("/beers").HandlerFunc(utils.Adapt(b.createBeerHandler, model.CheckBeerNameIsUnique())).Methods("POST")
 }
-
-// TODO validate in middleware that name is unique
-// TODO add S3 image upload
 
 // PUT/PATCH /beers/:id
 func (b beer) updateBeer(w http.ResponseWriter, req *http.Request) {

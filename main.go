@@ -11,8 +11,6 @@ import (
 	"github.com/rs/cors"
 )
 
-// TODO use db.FirstOrCreate
-
 func init() {
 	config.SetVars()
 }
