@@ -18,9 +18,9 @@ GET /brewers/:id                        --- COMPLETE ---
 GET /brewers?:featured                  --- COMPLETE ---
 GET /brewers?:rank                      --- COMPLETE ---
 
-POST /brewers                           --- COMPLETE ---
+POST /brewers                           --- COMPLETE ---    || PARALLEL ||
 
-PUT/PATCH /brewers/:id                  --- COMPLETE ---
+PUT/PATCH /brewers/:id                  --- COMPLETE ---    || PARALLEL ||
 
 DELETE /brewers/:id                     --- COMPLETE ---
 

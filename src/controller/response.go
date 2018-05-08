@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// Response func
 func Response(w http.ResponseWriter, result *utils.Result) {
 	if result.Error != nil {
 		w.WriteHeader(result.Error.Status)
