@@ -13,15 +13,28 @@ type brewer struct{}
 func (b brewer) registerRoutes(r *mux.Router) {
 	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.getBrewer).Methods("GET")
 	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.deleteBrewer).Methods("DELETE")
-	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.updateBrewer, model.CheckUsernameIsUnique())).Methods("PUT", "PATCH")
+	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.updateBrewerWithChannels, model.SayHi())).Methods("PUT", "PATCH")
 	r.Path("/brewers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBrewers).Methods("GET")
 	r.Path("/brewers").Queries("rank", "{rank:[1-8]}").HandlerFunc(b.getRankedBrewers).Methods("GET")
 	r.Path("/brewers").HandlerFunc(b.getBrewers).Methods("GET")
-	r.Path("/brewers").HandlerFunc(utils.Adapt(b.createBrewer, model.CheckUsernameIsUnique())).Methods("POST")
+	r.Path("/brewers").HandlerFunc(utils.Adapt(b.createBrewerWithChannels, model.CheckUsernameIsUnique(), utils.SayHi())).Methods("POST")
 }
 
-// PUT/PATCH /brewers/:id
-func (b brewer) updateBrewer(w http.ResponseWriter, req *http.Request) {
+// POST /brewers
+func (b brewer) createBrewerWithChannels(w http.ResponseWriter, req *http.Request) {
+	first := req.FormValue("first_name")
+	last := req.FormValue("last_name")
+	feat := req.FormValue("featured")
+	username := req.FormValue("username")
+	rank := req.FormValue("rank")
+	beerIDs := req.FormValue("beer_ids")
+
+	result := model.CreateBrewerWithChannels(first, last, feat, username, rank, beerIDs)
+	Response(w, result)
+}
+
+// PUT|PATCH /brewers/:id
+func (b brewer) updateBrewerWithChannels(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
 	first := req.FormValue("first_name")
@@ -31,7 +44,7 @@ func (b brewer) updateBrewer(w http.ResponseWriter, req *http.Request) {
 	rank := req.FormValue("rank")
 	beerIDs := req.FormValue("beer_ids")
 
-	result := model.UpdateBrewer(id, first, last, feat, username, rank, beerIDs)
+	result := model.UpdateBrewerWithChannels(id, first, last, username, feat, rank, beerIDs)
 	Response(w, result)
 }
 
@@ -41,19 +54,6 @@ func (b brewer) deleteBrewer(w http.ResponseWriter, req *http.Request) {
 	id := vars["id"]
 
 	result := model.DeleteBrewer(id)
-	Response(w, result)
-}
-
-// POST /brewers
-func (b brewer) createBrewer(w http.ResponseWriter, req *http.Request) {
-	first := req.FormValue("first_name")
-	last := req.FormValue("last_name")
-	feat := req.FormValue("featured")
-	username := req.FormValue("username")
-	rank := req.FormValue("rank")
-	beerIDs := req.FormValue("beer_ids")
-
-	result := model.CreateBrewer(first, last, feat, username, rank, beerIDs)
 	Response(w, result)
 }
 
