@@ -31,28 +31,33 @@ func getBrewer(id string, brewCh chan chanResult) {
 	fmt.Println("fetch brewer completed")
 }
 
-func getRank(lvl string, rankCh chan chanResult) {
+func getRank(lvl string) <-chan chanResult {
+	out := make(chan chanResult)
 	rank := Rank{}
+
 	go func() {
 		if err := db.Model(&Rank{}).Where("level = ?", lvl).Find(&rank).Error; err != nil {
-			rankCh <- chanResult{nil, err}
+			out <- chanResult{nil, err}
 		}
-		rankCh <- chanResult{&rank, nil}
+		out <- chanResult{&rank, nil}
 	}()
-	fmt.Println("fetch rank completed")
+
+	return out
 }
 
-func getBeers(beerIDs string, beersCh chan chanResult) {
+func getBeers(beerIDs string) <-chan chanResult {
+	out := make(chan chanResult)
 	bIDs := strings.Split(beerIDs, ",")
 	beers := []Beer{}
 	go func() {
 		err := db.Model(&Beer{}).Where("id in (?)", bIDs).Find(&beers).Error
 		if err != nil {
-			beersCh <- chanResult{nil, err}
+			out <- chanResult{nil, err}
 		}
-		beersCh <- chanResult{beers, nil}
+		out <- chanResult{beers, nil}
 	}()
-	fmt.Println("fetch beers completed")
+
+	return out
 }
 
 // CreateBrewerWithChannels func
@@ -60,40 +65,41 @@ func CreateBrewerWithChannels(first, last, ft, uname, rnk, beerIDs string) *util
 	var rank *Rank
 	var beers []Beer
 	feat, _ := strconv.ParseBool(ft)
-	rankCh := make(chan chanResult)
-	beersCh := make(chan chanResult)
+
+	var beersResult <-chan chanResult
+	var rankResult <-chan chanResult
 
 	tx := db.Begin()
 	if len(rnk) == 0 {
-		rankCh = nil
+		rankResult = nil
 	} else {
-		go getRank(rnk, rankCh)
+		rankResult = getRank(rnk)
 	}
 
 	if len(beerIDs) == 0 {
-		beersCh = nil
+		beersResult = nil
 	} else {
-		go getBeers(beerIDs, beersCh)
+		beersResult = getBeers(beerIDs)
 	}
 
-	for rankCh != nil || beersCh != nil {
+	for rankResult != nil || beersResult != nil {
 		select {
-		case fetchRank := <-rankCh:
+		case fetchRank := <-rankResult:
 			if fetchRank.Error != nil {
 				tx.Rollback()
 				dbError = dbWithError(fetchRank.Error, http.StatusNotFound, "Error fetching Rank from DB")
 				return dbError
 			}
 			rank = fetchRank.Data.(*Rank)
-			rankCh = nil
-		case fetchBeers := <-beersCh:
+			rankResult = nil
+		case fetchBeers := <-beersResult:
 			if fetchBeers.Error != nil {
 				tx.Rollback()
 				dbError = dbWithError(fetchBeers.Error, http.StatusNotFound, "Error fetching beers from DB")
 				return dbError
 			}
 			beers = fetchBeers.Data.([]Beer)
-			beersCh = nil
+			beersResult = nil
 		default:
 		}
 	}
@@ -129,8 +135,8 @@ func UpdateBrewerWithChannels(id, f, l, uname, ft, rnk, beerIDs string) *utils.R
 
 	var rank *Rank
 	var beers []Beer
-	rankCh := make(chan chanResult)
-	beersCh := make(chan chanResult)
+	var rankResult <-chan chanResult
+	var beersResult <-chan chanResult
 
 	// all db writes pass together, otherwise all fail together
 	tx := db.Begin()
@@ -179,20 +185,20 @@ brewLoop:
 	}
 
 	if len(rnk) == 0 {
-		rankCh = nil
+		rankResult = nil
 	} else {
-		go getRank(rnk, rankCh)
+		rankResult = getRank(rnk)
 	}
 
 	if len(beerIDs) == 0 {
-		beersCh = nil
+		beersResult = nil
 	} else {
-		go getBeers(beerIDs, beersCh)
+		beersResult = getBeers(beerIDs)
 	}
 
-	for rankCh != nil || beersCh != nil {
+	for rankResult != nil || beersResult != nil {
 		select {
-		case fetchRank := <-rankCh:
+		case fetchRank := <-rankResult:
 			if fetchRank.Error != nil {
 				dbError = dbWithError(fetchRank.Error, http.StatusNotFound, "Error fetching Rank from DB")
 				return dbError
@@ -204,8 +210,8 @@ brewLoop:
 				dbError = dbWithError(err, http.StatusInternalServerError, "Error updating Brewer rank")
 				return dbError
 			}
-			rankCh = nil
-		case fetchBeers := <-beersCh:
+			rankResult = nil
+		case fetchBeers := <-beersResult:
 			if fetchBeers.Error != nil {
 				dbError = dbWithError(fetchBeers.Error, http.StatusNotFound, "Error fetching Beers from DB")
 				return dbError
@@ -217,7 +223,7 @@ brewLoop:
 				dbError = dbWithError(err, http.StatusInternalServerError, "Error updating Brewer's beers")
 				return dbError
 			}
-			beersCh = nil
+			beersResult = nil
 		default:
 		}
 	}
