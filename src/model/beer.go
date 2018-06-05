@@ -32,6 +32,7 @@ func GetBeers(limit, order, offset string) *utils.Result {
 
 // CreateBeer func
 func CreateBeer(name, desc, status, alc, feat, brewerIDs string, image ReqImage) *utils.Result {
+	var brewers []Brewer
 	var imgURL string
 	imageURL, err := s3ImageUpload(image)
 	if err != nil {
@@ -39,10 +40,12 @@ func CreateBeer(name, desc, status, alc, feat, brewerIDs string, image ReqImage)
 	}
 	imgURL = imageURL.(string)
 
-	bIDs := strings.Split(brewerIDs, ",")
-	brewers := []Brewer{}
-	if err := db.Model(&Brewer{}).Where("id in (?)", bIDs).Find(&brewers).Error; err != nil {
-		return dbWithError(err, http.StatusNotFound, "Error fetching brewers from DB")
+	if len(brewerIDs) > 0 {
+		bIDs := strings.Split(brewerIDs, ",")
+
+		if err := db.Model(&Brewer{}).Where("id in (?)", bIDs).Find(&brewers).Error; err != nil {
+			return dbWithError(err, http.StatusNotFound, "Error fetching brewers from DB")
+		}
 	}
 
 	alcFl, _ := strconv.ParseFloat(alc, 64)
@@ -67,17 +70,18 @@ func CreateBeer(name, desc, status, alc, feat, brewerIDs string, image ReqImage)
 // UpdateBeer func
 func UpdateBeer(id, name, desc, status, alc, feat, brewerIDs string, image ReqImage) *utils.Result {
 	beer := Beer{}
+	var imgURL string
+	var brewers []Brewer
+
 	if err := db.Model(&beer).Preload("Brewers.Rank").Where("id = ?", id).Find(&beer).Error; err != nil {
 		return dbWithError(err, http.StatusNotFound, "Error fetching beer from DB")
 	}
 
-	var imgURL string
 	imageURL, err := s3ImageUpload(image)
 	if err == nil {
 		imgURL = imageURL.(string)
 	}
 
-	var brewers []Brewer
 	if len(brewerIDs) > 0 {
 		bIDs := strings.Split(brewerIDs, ",")
 		if err := db.Model(&Brewer{}).Where("id in (?)", bIDs).Find(&brewers).Error; err != nil {
@@ -86,7 +90,6 @@ func UpdateBeer(id, name, desc, status, alc, feat, brewerIDs string, image ReqIm
 	}
 
 	alcFl, _ := strconv.ParseFloat(alc, 64)
-	ft, _ := strconv.ParseBool(feat)
 
 	if err := db.Model(&beer).Updates(&Beer{
 		Name:           name,
@@ -98,8 +101,12 @@ func UpdateBeer(id, name, desc, status, alc, feat, brewerIDs string, image ReqIm
 		return dbWithError(err, http.StatusInternalServerError, "Error updating beer")
 	}
 
-	if err := db.Model(&beer).Update("featured", ft).Error; err != nil {
-		return dbWithError(err, http.StatusInternalServerError, "Error updating featured status of beer")
+	if len(feat) > 0 {
+		ft, _ := strconv.ParseBool(feat)
+
+		if err := db.Model(&beer).Update("featured", ft).Error; err != nil {
+			return dbWithError(err, http.StatusInternalServerError, "Error updating featured status of beer")
+		}
 	}
 
 	if len(brewers) > 0 {
