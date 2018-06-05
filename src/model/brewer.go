@@ -17,44 +17,39 @@ type chanResult struct {
 	Error error
 }
 
-func getBrewer(id string, brewCh chan chanResult) {
-	brewer := Brewer{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if err := db.Model(&Brewer{}).Preload("Beers").Preload("Rank").Where("id = ?", id).Find(&brewer).Error; err != nil {
-			brewCh <- chanResult{nil, err}
-		}
-		brewCh <- chanResult{brewer, nil}
-	}()
-	wg.Wait()
-	fmt.Println("fetch brewer completed")
-}
-
-func getRank(lvl string) <-chan chanResult {
+func gettRank(done chan interface{}, lvl string) <-chan chanResult {
 	out := make(chan chanResult)
+	var result chanResult
 	rank := Rank{}
-
 	go func() {
-		if err := db.Model(&Rank{}).Where("level = ?", lvl).Find(&rank).Error; err != nil {
-			out <- chanResult{nil, err}
-		}
-		out <- chanResult{&rank, nil}
-	}()
+		defer close(out)
+		defer fmt.Println("Closing rank out")
 
+		if err := db.Model(&Rank{}).Where("level = ?", lvl).Find(&rank).Error; err != nil {
+			result = chanResult{nil, err}
+		}
+		result = chanResult{&rank, nil}
+
+		for {
+			select {
+			case out <- result:
+			case <-done:
+				return
+			}
+		}
+	}()
 	return out
 }
 
-func getBeers(beerIDs string) <-chan chanResult {
-	out := make(chan chanResult)
-	bIDs := strings.Split(beerIDs, ",")
-	beers := []Beer{}
+func getNum(num int) <-chan int {
+	out := make(chan int)
+
 	go func() {
-		err := db.Model(&Beer{}).Where("id in (?)", bIDs).Find(&beers).Error
-		if err != nil {
-			out <- chanResult{nil, err}
+		sum := 0
+		for i := 1; i <= num; i++ {
+			sum += i
 		}
-		out <- chanResult{beers, nil}
+		out <- sum
 	}()
 
 	return out
@@ -62,7 +57,7 @@ func getBeers(beerIDs string) <-chan chanResult {
 
 // CreateBrewerWithChannels func
 func CreateBrewerWithChannels(first, last, ft, uname, rnk, beerIDs string) *utils.Result {
-	var rank *Rank
+	var rank Rank
 	var beers []Beer
 	feat, _ := strconv.ParseBool(ft)
 
@@ -90,7 +85,7 @@ func CreateBrewerWithChannels(first, last, ft, uname, rnk, beerIDs string) *util
 				dbError = dbWithError(fetchRank.Error, http.StatusNotFound, "Error fetching Rank from DB")
 				return dbError
 			}
-			rank = fetchRank.Data.(*Rank)
+			rank = fetchRank.Data.(Rank)
 			rankResult = nil
 		case fetchBeers := <-beersResult:
 			if fetchBeers.Error != nil {
@@ -109,7 +104,7 @@ func CreateBrewerWithChannels(first, last, ft, uname, rnk, beerIDs string) *util
 		LastName:  last,
 		Featured:  feat,
 		Username:  &uname,
-		Rank:      rank,
+		Rank:      &rank,
 		Beers:     beers,
 	}
 
@@ -120,11 +115,7 @@ func CreateBrewerWithChannels(first, last, ft, uname, rnk, beerIDs string) *util
 	}
 
 	tx.Commit()
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   brewer,
-	}
-	return &result
+	return dbSuccess(brewer)
 }
 
 // UpdateBrewerWithChannels func
@@ -229,35 +220,20 @@ brewLoop:
 	}
 
 	tx.Commit()
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   &brewer,
-	}
-	return &result
+	return dbSuccess(brewer)
 }
 
 // DeleteBrewer func
 func DeleteBrewer(id string) *utils.Result {
 	brewer := Brewer{}
 	if err := db.Model(&Brewer{}).Where("id = ?", id).Find(&brewer).Error; err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusNotFound,
-			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching brewer from DB",
-		}
-		return &result
+		return dbWithError(err, http.StatusNotFound, "Error fetching brewer from DB")
 	}
 	if err := db.Delete(&brewer).Error; err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusInternalServerError,
-			StatusText: http.StatusText(http.StatusInternalServerError) + " - Error deleting brewer from DB",
-		}
-		return &result
+		return dbWithError(err, http.StatusInternalServerError, "Error deleting brewer from DB")
 	}
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   http.StatusText(http.StatusOK) + " - Successfully deleted brewer from DB",
-	}
-	return &result
+
+	return dbSuccess(http.StatusText(http.StatusOK) + " - Successfully deleted brewer from DB")
 }
 
 // CreateBrewer func
@@ -267,19 +243,12 @@ func CreateBrewer(first, last, feat, uname, rank, beerIDs string) *utils.Result 
 
 	beers := []Beer{}
 	if err := db.Model(&Beer{}).Where("id in (?)", bIDs).Find(&beers).Error; err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusNotFound,
-			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching beers from DB",
-		}
-		return &result
+		return dbWithError(err, http.StatusNotFound, "Error fetching beers from DB")
 	}
+
 	r := Rank{}
 	if err := db.Model(&Rank{}).Where("level = ?", rank).Find(&r).Error; err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusNotFound,
-			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching rank from DB",
-		}
-		return &result
+		return dbWithError(err, http.StatusNotFound, "Error fetching rank from DB")
 	}
 
 	brewer := Brewer{
@@ -292,18 +261,10 @@ func CreateBrewer(first, last, feat, uname, rank, beerIDs string) *utils.Result 
 	}
 
 	if err := db.Save(&brewer).Error; err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusInternalServerError,
-			StatusText: http.StatusText(http.StatusInternalServerError) + " - Error saving brewer to DB",
-		}
-		return &result
+		return dbWithError(err, http.StatusInternalServerError, "Error saving brewer to DB")
 	}
 
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   &brewer,
-	}
-	return &result
+	return dbSuccess(brewer)
 }
 
 // GetRankedBrewers func
@@ -313,18 +274,10 @@ func GetRankedBrewers(level string) *utils.Result {
 	err := db.Model(&Brewer{}).Preload("Rank").Joins("inner join ranks on ranks.brewer_id = brewers.id").Where("ranks.level = ?", level).Find(&brewers).Error
 
 	if err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusNotFound,
-			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching beers from DB",
-		}
-		return &result
+		return dbWithError(err, http.StatusNotFound, "Error fetching beers from DB")
 	}
 
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   &brewers,
-	}
-	return &result
+	return dbSuccess(brewers)
 }
 
 // GetFeaturedBrewers func
@@ -335,18 +288,10 @@ func GetFeaturedBrewers(feat string) *utils.Result {
 		Where("featured = ?", feat).Find(&brewers).Error
 
 	if err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusNotFound,
-			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching featured brewers from DB",
-		}
-		return &result
+		return dbWithError(err, http.StatusNotFound, "Error fetching featured brewers from DB")
 	}
 
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   &brewers,
-	}
-	return &result
+	return dbSuccess(brewers)
 }
 
 // GetBrewer func
@@ -357,18 +302,10 @@ func GetBrewer(id string) *utils.Result {
 		Where("id = ?", id).Find(&brewer).Error
 
 	if err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusNotFound,
-			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching Brewer from DB",
-		}
-		return &result
+		return dbWithError(err, http.StatusNotFound, "Error fetching Brewer from DB")
 	}
 
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   &brewer,
-	}
-	return &result
+	return dbSuccess(brewer)
 }
 
 // GetBrewers func
@@ -382,15 +319,52 @@ func GetBrewers(lim, ord, offs string) *utils.Result {
 		Preload("Beers").Preload("Rank").Find(&brewers).Error
 
 	if err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusNotFound,
-			StatusText: http.StatusText(http.StatusNotFound) + " - Error fetching brewers from DB",
+		return dbWithError(err, http.StatusNotFound, "Error fetching brewers from DB")
+	}
+
+	return dbSuccess(brewers)
+}
+
+// ============ GOROUTINES FOR ASSOC FETCHING ============ //
+
+func getBrewer(id string, brewCh chan chanResult) {
+	brewer := Brewer{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := db.Model(&Brewer{}).Preload("Beers").Preload("Rank").Where("id = ?", id).Find(&brewer).Error; err != nil {
+			brewCh <- chanResult{nil, err}
 		}
-		return &result
-	}
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   &brewers,
-	}
-	return &result
+		brewCh <- chanResult{brewer, nil}
+	}()
+	wg.Wait()
+}
+
+func getRank(lvl string) <-chan chanResult {
+	out := make(chan chanResult)
+	rank := Rank{}
+
+	go func() {
+		if err := db.Model(&Rank{}).Where("level = ?", lvl).Find(&rank).Error; err != nil {
+			out <- chanResult{nil, err}
+		}
+		out <- chanResult{&rank, nil}
+	}()
+
+	return out
+}
+
+func getBeers(beerIDs string) <-chan chanResult {
+	out := make(chan chanResult)
+	bIDs := strings.Split(beerIDs, ",")
+	beers := []Beer{}
+	go func() {
+		err := db.Model(&Beer{}).Where("id in (?)", bIDs).Find(&beers).Error
+		if err != nil {
+			out <- chanResult{nil, err}
+		}
+		out <- chanResult{beers, nil}
+	}()
+
+	return out
 }
