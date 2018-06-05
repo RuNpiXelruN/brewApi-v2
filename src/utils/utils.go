@@ -8,12 +8,14 @@ import (
 
 var result Result
 
+// ParseTime func
 func ParseTime(timeRaw string) time.Time {
 	const timeLayout = "02-01-2006 15:04 (MST)"
 	t, _ := time.Parse(timeLayout, timeRaw)
 	return t
 }
 
+//Response func
 // for handling Responses in middleware only
 func Response(w http.ResponseWriter, result *Result) {
 	if result.Error != nil {

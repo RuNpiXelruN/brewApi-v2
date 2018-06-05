@@ -8,9 +8,9 @@ type Beer struct {
 	Name           string     `json:"name" gorm:"not null;" sql:"unique"`
 	Description    string     `json:"description" sql:"default:'A default beer description here'"`
 	Status         string     `json:"status" sql:"default:'upcoming'"`
-	ImageURL       string     `json:"image_url;" sql:"default:'https://placeimg.com/180/400/any'"`
-	AlcoholContent float64    `json:"alcohol_content;" sql:"default:4.44"`
-	Featured       bool       `json:"featured;" sql:"default:false"`
+	ImageURL       string     `json:"image_url" sql:"default:'https://placeimg.com/180/400/any'"`
+	AlcoholContent float64    `json:"alcohol_content" sql:"default:4.44"`
+	Featured       bool       `json:"featured" sql:"default:false"`
 	Brewers        []Brewer   `json:"brewers" gorm:"many2many:beer_brewers"`
 	CreatedAt      time.Time  `json:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at"`
