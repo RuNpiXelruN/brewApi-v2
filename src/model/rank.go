@@ -13,35 +13,26 @@ type BasicRank struct {
 }
 
 // GetBrewersOfRank func
-func GetBrewersOfRank(level string) *utils.Result {
+func GetBrewersOfRank(rnk, limit, order, offset string) *utils.Result {
 	rank := Rank{}
-	if err := db.Model(&Rank{}).Preload("Brewers").Where("level = ?", level).Find(&rank).Error; err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusInternalServerError,
-			StatusText: http.StatusText(http.StatusInternalServerError) + " - Error fetching ranked brewers from DB",
-		}
-		return &result
+
+	err := db.Model(&Rank{}).
+		Limit(limit).Order("created_at "+order).Offset(offset).
+		Where("level = ?", rnk).Preload("Brewers.Beers").Find(&rank).Error
+	if err != nil {
+		return dbWithError(err, http.StatusNotFound, "Error fetching ranked brewers from db")
 	}
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   &rank,
-	}
-	return &result
+
+	return dbSuccess(&rank)
 }
 
 // GetRanks func
 func GetRanks(limit, order, offset string) *utils.Result {
 	ranks := []BasicRank{}
-	if err := db.Model(&Rank{}).Limit(limit).Order("created_at " + order).Offset(offset).Select([]string{"id", "name", "level"}).Scan(&ranks).Error; err != nil {
-		result.Error = &utils.Error{
-			Status:     http.StatusInternalServerError,
-			StatusText: http.StatusText(http.StatusInternalServerError) + " - Error fetching ranks from DB",
-		}
-		return &result
+	err := db.Model(&Rank{}).Limit(limit).Order("created_at " + order).Offset(offset).Select([]string{"id", "name", "level"}).Scan(&ranks).Error
+	if err != nil {
+		return dbWithError(err, http.StatusInternalServerError, "Error fetching ranks from DB")
 	}
-	result.Success = &utils.Success{
-		Status: http.StatusOK,
-		Data:   &ranks,
-	}
-	return &result
+
+	return dbSuccess(&ranks)
 }

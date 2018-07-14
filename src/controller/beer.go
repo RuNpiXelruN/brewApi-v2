@@ -14,23 +14,22 @@ import (
 type beer struct{}
 
 func (b beer) registerRoutes(r *mux.Router) {
-	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.getBeer)).Methods("GET")
-	r.Path("/beers/{id:[0-9]+}").HandlerFunc(b.updateBeer).Methods("PUT", "PATCH")
-	r.Path("/beers/{id:[0-9]+}").HandlerFunc(b.deleteBeer).Methods("DELETE")
-	r.Path("/beers").Queries("status", "{status:(?:upcoming|brewing|active-full|active-empty|past)}").HandlerFunc(b.getBeersWithStatus).Methods("GET")
-	r.Path("/beers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBeers).Methods("GET")
-	// r.Path("/beers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBeers).Methods("GET")
-	r.Path("/beers").HandlerFunc(b.getBeers).Methods("GET")
-	r.Path("/beers").HandlerFunc(b.createBeer).Methods("POST")
-	// r.Path("/beers").HandlerFunc(utils.Adapt(b.createBeerHandler, model.CheckBeerNameIsUnique())).Methods("POST")
+	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.getBeer)).Methods("GET")                                                                         // GET /beers/:id
+	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.updateBeer, model.CheckBeerNameUpdateIsUnique(), model.CheckUserAuth())).Methods("PUT", "PATCH") // PUT/PATCH /beers/:id
+	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.deleteBeer, model.CheckUserAuth())).Methods("DELETE")                                            // DELETE /beer/:id
+	r.Path("/beers").Queries("status", "{status:(?:upcoming|brewing|active|past)}").HandlerFunc(b.getBeersWithStatus).Methods("GET")                        // GET /beers?:status
+	r.Path("/beers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBeers).Methods("GET")                                        // GET /beers?:featured
+	r.Path("/beers").HandlerFunc(b.getBeers).Methods("GET")                                                                                                 // GET /beers
+	r.Path("/beers").HandlerFunc(utils.Adapt(b.createBeer, model.CheckBeerNameIsUnique(), model.CheckUserAuth())).Methods("POST")                           // POST /beers
 }
 
 // GET /beers/:id
 func (b beer) getBeer(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
+	includeBrewers := req.FormValue("include_brewers")
 
-	result := model.GetBeer(id)
+	result := model.GetBeer(id, includeBrewers)
 	Response(w, result)
 }
 

@@ -10,15 +10,19 @@ import (
 type rank struct{}
 
 func (rn rank) registerRoutes(r *mux.Router) {
-	r.Path("/ranks").Queries("level", "{level:[1-8]}").HandlerFunc(rn.getBrewersOfRank).Methods("GET")
-	r.Path("/ranks").HandlerFunc(rn.getRanks).Methods("GET")
+	r.Path("/ranks/{rank:[1-8]}").HandlerFunc(rn.getBrewersOfRank).Methods("GET") // GET /ranks/:level ?:(limit|order|offset)
+	r.Path("/ranks").HandlerFunc(rn.getRanks).Methods("GET")                      // GET /ranks?:(limit|order|offset)
 }
 
-// GET /ranks?:(level)
+// GET /ranks/:level ?:(limit|order|offset)
 func (rn rank) getBrewersOfRank(w http.ResponseWriter, req *http.Request) {
-	level := req.FormValue("level")
+	vars := mux.Vars(req)
+	rank := vars["rank"]
+	limit := req.FormValue("limit")
+	order := req.FormValue("order")
+	offset := req.FormValue("offset")
 
-	result := model.GetBrewersOfRank(level)
+	result := model.GetBrewersOfRank(rank, limit, order, offset)
 	Response(w, result)
 }
 

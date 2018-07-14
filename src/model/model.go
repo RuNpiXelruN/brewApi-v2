@@ -18,6 +18,7 @@ type ReqImage struct {
 }
 
 func dbWithError(err error, code int, text string) *utils.Result {
+	result := utils.Result{}
 	result.Error = &utils.Error{
 		Status:     code,
 		StatusText: http.StatusText(code) + " - " + text + " : " + err.Error(),
@@ -26,6 +27,8 @@ func dbWithError(err error, code int, text string) *utils.Result {
 }
 
 func dbSuccess(data interface{}) *utils.Result {
+	result := utils.Result{}
+
 	result.Success = &utils.Success{
 		Status: http.StatusOK,
 		Data:   &data,
