@@ -154,7 +154,11 @@ func DeleteBeer(id string) *utils.Result {
 }
 
 // GetBeersWithStatus func
-func GetBeersWithStatus(status, limit, order string) *utils.Result {
+func GetBeersWithStatus(status, limit, ord string) *utils.Result {
+	order := "desc"
+	if len(ord) > 0 {
+		order = ord
+	}
 	beers := []Beer{}
 	if err := db.Model(&Beer{}).Limit(limit).Order("created_at "+order).
 		Preload("Brewers.Rank").

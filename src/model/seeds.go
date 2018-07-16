@@ -12,9 +12,9 @@ func seedAll() {
 func seedBeersBrewersRanks() {
 	beers := []Beer{
 		Beer{
-			Name:     "Apricot Wheat Beer",
-			Status:   "upcoming",
-			Featured: true,
+			Name:     "Rice to Meet You",
+			Status:   "active-empty",
+			Featured: false,
 			Brewers: []Brewer{
 				Brewer{
 					FirstName: "justin",
@@ -26,8 +26,8 @@ func seedBeersBrewersRanks() {
 					},
 				},
 				Brewer{
-					FirstName: "annabelle",
-					LastName:  "davidson",
+					FirstName: "luis",
+					LastName:  "ramos",
 					Featured:  false,
 					Rank: &Rank{
 						Name:  "level 2 brewmaster",
@@ -38,22 +38,22 @@ func seedBeersBrewersRanks() {
 		},
 		Beer{
 			Name:     "Pineapple Pale Ale",
-			Status:   "brewing",
+			Status:   "active-full",
 			Featured: false,
 			Brewers: []Brewer{
 				Brewer{
-					FirstName: "sawyer",
-					LastName:  "davidson",
-					Featured:  true,
+					FirstName: "thom",
+					LastName:  "vincent",
+					Featured:  false,
 					Rank: &Rank{
 						Name:  "level 3 brewmaster",
 						Level: 3,
 					},
 				},
 				Brewer{
-					FirstName: "brooks",
-					LastName:  "davidson",
-					Featured:  true,
+					FirstName: "alex",
+					LastName:  "rapley",
+					Featured:  false,
 					Rank: &Rank{
 						Name:  "level 4 brewmaster",
 						Level: 4,
@@ -62,13 +62,13 @@ func seedBeersBrewersRanks() {
 			},
 		},
 		Beer{
-			Name:     "Rice to Meet You",
+			Name:     "Apricot Wheat Beer",
 			Status:   "active-full",
 			Featured: false,
 			Brewers: []Brewer{
 				Brewer{
-					FirstName: "pete",
-					LastName:  "smith",
+					FirstName: "shealan",
+					LastName:  "forshaw",
 					Featured:  false,
 					Rank: &Rank{
 						Name:  "level 5 brewmaster",
@@ -76,8 +76,8 @@ func seedBeersBrewersRanks() {
 					},
 				},
 				Brewer{
-					FirstName: "jennie",
-					LastName:  "morton",
+					FirstName: "chris",
+					LastName:  "ellis",
 					Featured:  false,
 					Rank: &Rank{
 						Name:  "level 6 brewmaster",
@@ -88,12 +88,12 @@ func seedBeersBrewersRanks() {
 		},
 		Beer{
 			Name:     "Redfern Imperial IPA",
-			Status:   "past",
+			Status:   "brewing",
 			Featured: false,
 			Brewers: []Brewer{
 				Brewer{
-					FirstName: "michael",
-					LastName:  "davidson",
+					FirstName: "ronnie",
+					LastName:  "pyne",
 					Featured:  false,
 					Rank: &Rank{
 						Name:  "level 7 brewmaster",
@@ -101,8 +101,8 @@ func seedBeersBrewersRanks() {
 					},
 				},
 				Brewer{
-					FirstName: "jenny",
-					LastName:  "davidson",
+					FirstName: "liam",
+					LastName:  "fiddler",
 					Featured:  false,
 					Rank: &Rank{
 						Name:  "level 8 brewmaster",
@@ -115,53 +115,5 @@ func seedBeersBrewersRanks() {
 
 	for _, b := range beers {
 		db.Save(&b)
-	}
-}
-
-func seedBrewers() {
-	brewers := []Brewer{
-		Brewer{
-			FirstName: "justin",
-		},
-		Brewer{
-			FirstName: "annabelle",
-		},
-		Brewer{
-			FirstName: "sawyer",
-		},
-		Brewer{
-			FirstName: "brooks",
-		},
-	}
-	for _, b := range brewers {
-		db.Save(&b)
-	}
-}
-
-func seedRanks() {
-	ranks := []Rank{
-		Rank{
-			Name:  "Level 1 Brewmaster",
-			Level: 1,
-		},
-		Rank{
-			Name:  "Level 2 Brewmaster",
-			Level: 2,
-		},
-		Rank{
-			Name:  "Level 3 Brewmaster",
-			Level: 3,
-		},
-		Rank{
-			Name:  "Level 4 Brewmaster",
-			Level: 4,
-		},
-		Rank{
-			Name:  "Level 5 Brewmaster",
-			Level: 5,
-		},
-	}
-	for _, r := range ranks {
-		db.Save(&r)
 	}
 }
