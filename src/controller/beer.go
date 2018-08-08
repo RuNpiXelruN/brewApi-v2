@@ -19,17 +19,23 @@ func (b beer) registerRoutes(r *mux.Router) {
 	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.deleteBeer, model.CheckUserAuth())).Methods("DELETE")                                            // DELETE /beer/:id
 	r.Path("/beers").Queries("status", "{status:(?:upcoming|brewing|active|past)}").HandlerFunc(b.getBeersWithStatus).Methods("GET")                        // GET /beers?:status
 	r.Path("/beers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBeers).Methods("GET")                                        // GET /beers?:featured
+	r.Path("/beers/basic").HandlerFunc(b.getBasicBeers).Methods("GET")                                                                                      // GET /beers/basic
 	r.Path("/beers").HandlerFunc(b.getBeers).Methods("GET")                                                                                                 // GET /beers
 	r.Path("/beers").HandlerFunc(utils.Adapt(b.createBeer, model.CheckBeerNameIsUnique(), model.CheckUserAuth())).Methods("POST")                           // POST /beers
+}
+
+// GET /beers/basic
+func (b beer) getBasicBeers(w http.ResponseWriter, req *http.Request) {
+	result := model.GetBasicBeers()
+	Response(w, result)
 }
 
 // GET /beers/:id
 func (b beer) getBeer(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
-	includeBrewers := req.FormValue("include_brewers")
 
-	result := model.GetBeer(id, includeBrewers)
+	result := model.GetBeer(id)
 	Response(w, result)
 }
 
@@ -47,7 +53,7 @@ func (b beer) getBeers(w http.ResponseWriter, req *http.Request) {
 func (b beer) createBeer(w http.ResponseWriter, req *http.Request) {
 	name := req.FormValue("name")
 	description := req.FormValue("description")
-	status := req.FormValue("status")
+	status := req.FormValue("selectedStatus")
 	alc := req.FormValue("alcohol_content")
 	feat := req.FormValue("featured")
 	brewerIDs := req.FormValue("brewer_ids")

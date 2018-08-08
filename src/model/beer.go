@@ -10,26 +10,20 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// GetBeer func
-func GetBeer(id, includeBrewers string) *utils.Result {
-	beer := Beer{}
-	if err := db.Model(&Beer{}).Preload("Brewers.Rank").Where("id = ?", id).Find(&beer).Error; err != nil {
-		return dbWithError(err, http.StatusNotFound, "Error fetching beer from DB")
+// GetBasicBeers func
+func GetBasicBeers() *utils.Result {
+	beers := []BasicBeer{}
+	if err := db.Model(&Beer{}).Select([]string{"id", "name"}).Scan(&beers).Error; err != nil {
+		return dbWithError(err, http.StatusInternalServerError, "Cannot fetch basic beers")
 	}
-	brewers := []BasicBrewer{}
-	if len(includeBrewers) > 0 {
-		include, _ := strconv.ParseBool(includeBrewers)
-		if include == true {
-			err := db.Model(&Brewer{}).Order("first_name asc").Select([]string{"id", "first_name", "last_name"}).Scan(&brewers).Error
-			if err != nil {
-				return dbWithError(err, http.StatusInternalServerError, "Error fetching basic brewers from DB")
-			}
+	return dbSuccess(beers)
+}
 
-			data := make(map[string]interface{})
-			data["beer"] = &beer
-			data["brewers"] = &brewers
-			return dbSuccess(data)
-		}
+// GetBeer func
+func GetBeer(id string) *utils.Result {
+	beer := Beer{}
+	if err := db.Model(&Beer{}).Preload("Brewers").Where("id = ?", id).Find(&beer).Error; err != nil {
+		return dbWithError(err, http.StatusNotFound, "Error fetching beer from DB")
 	}
 
 	return dbSuccess(&beer)
@@ -38,7 +32,7 @@ func GetBeer(id, includeBrewers string) *utils.Result {
 // GetBeers func
 func GetBeers(limit, order, offset string) *utils.Result {
 	beers := []Beer{}
-	err := db.Model(&Beer{}).Preload("Brewers.Rank").Limit(limit).Offset(offset).Order("created_at " + order).Find(&beers).Error
+	err := db.Model(&Beer{}).Preload("Brewers.Rank").Limit(limit).Offset(offset).Order("updated_at desc").Find(&beers).Error
 	if err != nil {
 		return dbWithError(err, http.StatusInternalServerError, "Error fetching beers from Db")
 	}
@@ -47,6 +41,7 @@ func GetBeers(limit, order, offset string) *utils.Result {
 
 // CreateBeer func
 func CreateBeer(name, desc, status, alc, feat, brewerIDs string, image ReqImage) *utils.Result {
+
 	var imgURL string
 
 	if image.Error == nil {
@@ -192,7 +187,7 @@ func setBrewers(bIDs string, tx *gorm.DB) (*[]Brewer, error) {
 	if len(bIDs) > 0 {
 		brewerIDs := strings.Split(bIDs, ",")
 
-		if err := tx.Model(&Brewer{}).Where("id in (?)", brewerIDs).Find(&brewers).Error; err != nil {
+		if err := tx.Model(&Brewer{}).Preload("Rank").Where("id in (?)", brewerIDs).Find(&brewers).Error; err != nil {
 			tx.Rollback()
 			return nil, err
 		}
