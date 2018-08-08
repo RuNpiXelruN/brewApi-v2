@@ -9,6 +9,17 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// GetBrewerNames func
+func GetBrewerNames() *utils.Result {
+	names := []BasicBrewer{}
+	err := db.Model(&Brewer{}).Order("first_name asc").Select([]string{"id", "first_name", "last_name"}).Scan(&names).Error
+	if err != nil {
+		return dbWithError(err, http.StatusInternalServerError, "Error fetching brewer names from DB")
+	}
+
+	return dbSuccess(&names)
+}
+
 // GetBrewers func
 func GetBrewers(limit, order, offset string) *utils.Result {
 	brewers := []Brewer{}
