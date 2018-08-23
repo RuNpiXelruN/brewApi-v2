@@ -1,7 +1,7 @@
-package controller
+package api
 
 import (
-	"go_apps/go_api_apps/brewApi-v2/src/model"
+	"go_apps/go_api_apps/brewApi-v2/db"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -22,8 +22,8 @@ func (rn rank) getBrewersOfRank(w http.ResponseWriter, req *http.Request) {
 	order := req.FormValue("order")
 	offset := req.FormValue("offset")
 
-	result := model.GetBrewersOfRank(rank, limit, order, offset)
-	Response(w, result)
+	result := db.GetBrewersOfRank(rank, limit, order, offset)
+	Respond(w, result)
 }
 
 // GET /ranks?:(limit|order|offset)
@@ -32,6 +32,6 @@ func (rn rank) getRanks(w http.ResponseWriter, req *http.Request) {
 	order := req.FormValue("order")
 	offset := req.FormValue("offset")
 
-	result := model.GetRanks(limit, order, offset)
-	Response(w, result)
+	result := db.GetRanks(limit, order, offset)
+	Respond(w, result)
 }

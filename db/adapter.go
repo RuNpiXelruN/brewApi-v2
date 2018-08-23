@@ -1,7 +1,7 @@
-package model
+package db
 
 import (
-	"go_apps/go_api_apps/brewApi-v2/src/utils"
+	"go_apps/go_api_apps/brewApi-v2/utils"
 	"log"
 	"net/http"
 
@@ -17,10 +17,10 @@ func CheckPresenceOfFirstNameOrUsername() utils.Adapter {
 			if len(req.FormValue("first_name")) < 1 && len(req.FormValue("username")) < 1 {
 				result := utils.Result{}
 				result.Error = &utils.Error{
-					Status:     http.StatusBadRequest,
+					StatusCode: http.StatusBadRequest,
 					StatusText: http.StatusText(http.StatusBadRequest) + ": Must include either first name or last name.",
 				}
-				utils.Response(w, &result)
+				utils.Respond(w, &result)
 				return
 			}
 
@@ -40,10 +40,10 @@ func CheckUsernameIsUnique() utils.Adapter {
 				if newUsername != true {
 					result := utils.Result{}
 					result.Error = &utils.Error{
-						Status:     http.StatusBadRequest,
+						StatusCode: http.StatusBadRequest,
 						StatusText: http.StatusText(http.StatusBadRequest) + ": Username already exists.",
 					}
-					utils.Response(w, &result)
+					utils.Respond(w, &result)
 					return
 				}
 			}
@@ -64,10 +64,10 @@ func CheckBrewerUsernameIsUnique() utils.Adapter {
 				if isNewUsername != true {
 					result := utils.Result{}
 					result.Error = &utils.Error{
-						Status:     http.StatusBadRequest,
+						StatusCode: http.StatusBadRequest,
 						StatusText: http.StatusText(http.StatusBadRequest) + ": Username already taken.",
 					}
-					utils.Response(w, &result)
+					utils.Respond(w, &result)
 					return
 				}
 			}
@@ -89,10 +89,10 @@ func CheckBeerNameIsUnique() utils.Adapter {
 			if newName != true {
 				result := utils.Result{}
 				result.Error = &utils.Error{
-					Status:     http.StatusBadRequest,
+					StatusCode: http.StatusBadRequest,
 					StatusText: http.StatusText(http.StatusBadRequest) + ": Beer name already exists.",
 				}
-				utils.Response(w, &result)
+				utils.Respond(w, &result)
 				return
 			}
 
@@ -112,10 +112,10 @@ func CheckBeerNameUpdateIsUnique() utils.Adapter {
 			if err := db.Model(&Beer{}).Where("id = ?", id).Find(&dbBeer).Pluck("name", &dbName).Error; err != nil {
 				result := utils.Result{}
 				result.Error = &utils.Error{
-					Status:     http.StatusBadRequest,
+					StatusCode: http.StatusBadRequest,
 					StatusText: http.StatusText(http.StatusBadRequest) + ": Beer with that ID not found",
 				}
-				utils.Response(w, &result)
+				utils.Respond(w, &result)
 				return
 			}
 
@@ -127,11 +127,11 @@ func CheckBeerNameUpdateIsUnique() utils.Adapter {
 				if newName != true {
 					result := utils.Result{}
 					result.Error = &utils.Error{
-						Status:     http.StatusBadRequest,
+						StatusCode: http.StatusBadRequest,
 						StatusText: http.StatusText(http.StatusBadRequest) + ": Beer name already exists",
 					}
 
-					utils.Response(w, &result)
+					utils.Respond(w, &result)
 					return
 				}
 			}

@@ -1,7 +1,7 @@
-package model
+package db
 
 import (
-	"go_apps/go_api_apps/brewApi-v2/src/utils"
+	"go_apps/go_api_apps/brewApi-v2/utils"
 	"net/http"
 )
 
