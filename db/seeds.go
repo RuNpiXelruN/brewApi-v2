@@ -1,15 +1,22 @@
-package model
+package db
 
-func migrateDB() {
+func dropWithSeed() {
+	dropDatabase()
+	seedDatabase()
+}
+
+func dropDatabase() {
 	db.DropTableIfExists(&Beer{}, &Brewer{}, &Rank{}, "beer_brewers")
 	db.AutoMigrate(&Beer{}, &Brewer{}, &Rank{})
 }
 
-func seedAll() {
-	seedBeersBrewersRanks()
+func migrateDatabase() {
+	db.AutoMigrate(&Beer{}, &Brewer{}, &Rank{})
 }
 
-func seedBeersBrewersRanks() {
+func seedDatabase() {
+	migrateDatabase()
+
 	beers := []Beer{
 		Beer{
 			Name:     "Rice to Meet You",

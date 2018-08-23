@@ -8,12 +8,12 @@ type Result struct {
 
 // Success type
 type Success struct {
-	Status int         `json:"status"`
-	Data   interface{} `json:"data"`
+	StatusCode int         `json:"status_code"`
+	Data       interface{} `json:"data"`
 }
 
 // Error type
 type Error struct {
-	Status     int    `json:"status"`
-	StatusText string `json:"status_text"`
+	StatusCode int    `json:"status_code"`
+	StatusText string `json:"error_text"`
 }

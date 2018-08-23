@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"go_apps/go_api_apps/brewApi-v2/api"
 	"go_apps/go_api_apps/brewApi-v2/config"
-	"go_apps/go_api_apps/brewApi-v2/src/controller"
+	"go_apps/go_api_apps/brewApi-v2/db"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -20,14 +21,16 @@ func main() {
 	migrate := flag.Bool("migrate", false, "Include to migrate DB tables")
 	flag.Parse()
 
-	db := config.SetupDatabase(*seed, *migrate)
-	defer db.Close()
-
 	r := mux.NewRouter()
-	controller.Startup(r)
+	s := r.PathPrefix("/api").Subrouter()
+
+	database := db.Init(*seed, *migrate)
+	defer database.Close()
+
+	api.Startup(s)
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080"},
+		AllowedOrigins:   []string{"*"},
 		AllowedHeaders:   []string{"auth_token"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowCredentials: true,
@@ -37,9 +40,8 @@ func main() {
 
 	r.Path("/").HandlerFunc(index).Methods("GET")
 
-	go http.ListenAndServe(":8000", handler)
-	go fmt.Println("..listening on port :8000")
-	fmt.Scanln()
+	fmt.Println("..listening on port 8000")
+	http.ListenAndServe("0.0.0.0:8000", handler)
 }
 
 func index(w http.ResponseWriter, req *http.Request) {

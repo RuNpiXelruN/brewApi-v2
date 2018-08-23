@@ -1,0 +1,28 @@
+version: "3"
+services:
+  db:
+    image: postgres:9.6
+    volumes:
+      - ./db/pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=brewsite_backend_v1
+      - PGDATA=/data
+  api:
+    build:
+      context: .        
+      args:
+        app_env: ${APP_ENV}          
+    volumes:
+      - .:/go/src/go_apps/go_api_apps/brewApi-v2
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_PARAMS=postgres://admin:password@db:5432/brewsite_backend_v1?sslmode=disable
+    depends_on:
+      - db
+    links:
+      - db
+volumes:
+  pgdata:

@@ -1,7 +1,7 @@
-package controller
+package api
 
 import (
-	"go_apps/go_api_apps/brewApi-v2/src/model"
+	"go_apps/go_api_apps/brewApi-v2/db"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -18,13 +18,13 @@ func (b brewer) registerRoutes(r *mux.Router) {
 	r.Path("/brewers").Queries("rank", "{rank:[1-8]}").HandlerFunc(b.getRankedBrewers).Methods("GET")                    // GET /brewers/:rank
 	r.Path("/brewers").HandlerFunc(b.getBrewers).Methods("GET")                                                          // GET /brewers
 	r.Path("/brewers").HandlerFunc(b.createBrewer).Methods("POST")                                                       // POST /brewers
-	// r.Path("/brewers").HandlerFunc(utils.Adapt(b.createBrewer, model.CheckBrewerUsernameIsUnique(), model.CheckPresenceOfFirstNameOrUsername())).Methods("POST") // POST /brewers
+	// r.Path("/brewers").HandlerFunc(utils.Adapt(b.createBrewer, db.CheckBrewerUsernameIsUnique(), db.CheckPresenceOfFirstNameOrUsername())).Methods("POST") // POST /brewers
 }
 
 // GET /brewers/basic
 func (b brewer) getBrewerNames(w http.ResponseWriter, req *http.Request) {
-	result := model.GetBrewerNames()
-	Response(w, result)
+	result := db.GetBrewerNames()
+	Respond(w, result)
 }
 
 // GET /brewers
@@ -33,8 +33,8 @@ func (b brewer) getBrewers(w http.ResponseWriter, req *http.Request) {
 	order := req.FormValue("order")
 	offset := req.FormValue("offset")
 
-	result := model.GetBrewers(limit, order, offset)
-	Response(w, result)
+	result := db.GetBrewers(limit, order, offset)
+	Respond(w, result)
 }
 
 // GET /brewers/:id
@@ -43,8 +43,8 @@ func (b brewer) getBrewer(w http.ResponseWriter, req *http.Request) {
 	id := vars["id"]
 	includeBeers := req.FormValue("include_beers")
 
-	result := model.GetBrewer(id, includeBeers)
-	Response(w, result)
+	result := db.GetBrewer(id, includeBeers)
+	Respond(w, result)
 }
 
 // POST /brewers
@@ -56,8 +56,8 @@ func (b brewer) createBrewer(w http.ResponseWriter, req *http.Request) {
 	rank := req.FormValue("rank")
 	beerIDs := req.FormValue("beer_ids")
 
-	result := model.CreateBrewer(first, last, feat, username, rank, beerIDs)
-	Response(w, result)
+	result := db.CreateBrewer(first, last, feat, username, rank, beerIDs)
+	Respond(w, result)
 }
 
 // PUT/PATCH /brewers/:id
@@ -71,8 +71,8 @@ func (b brewer) updateBrewer(w http.ResponseWriter, req *http.Request) {
 	rank := req.FormValue("rank")
 	beerIDs := req.FormValue("beer_ids")
 
-	result := model.UpdateBrewer(id, first, last, feat, username, rank, beerIDs)
-	Response(w, result)
+	result := db.UpdateBrewer(id, first, last, feat, username, rank, beerIDs)
+	Respond(w, result)
 }
 
 // DELETE /brewers/:id
@@ -80,8 +80,8 @@ func (b brewer) deleteBrewer(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
 
-	result := model.DeleteBrewer(id)
-	Response(w, result)
+	result := db.DeleteBrewer(id)
+	Respond(w, result)
 }
 
 // GET /brewers/:rank
@@ -91,8 +91,8 @@ func (b brewer) getRankedBrewers(w http.ResponseWriter, req *http.Request) {
 	order := req.FormValue("order")
 	offset := req.FormValue("offset")
 
-	result := model.GetRankedBrewers(rankLevel, limit, order, offset)
-	Response(w, result)
+	result := db.GetRankedBrewers(rankLevel, limit, order, offset)
+	Respond(w, result)
 }
 
 // GET /brewers?:featured
@@ -101,6 +101,6 @@ func (b brewer) getFeaturedBrewers(w http.ResponseWriter, req *http.Request) {
 	limit := req.FormValue("limit")
 	order := req.FormValue("order")
 
-	result := model.GetFeaturedBrewers(feat, limit, order)
-	Response(w, result)
+	result := db.GetFeaturedBrewers(feat, limit, order)
+	Respond(w, result)
 }
