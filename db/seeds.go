@@ -1,17 +1,24 @@
 package db
 
+import (
+	"go_apps/go_api_apps/brewApi-v2/utils"
+	"time"
+
+	"github.com/satori/go.uuid"
+)
+
 func dropWithSeed() {
 	dropDatabase()
 	seedDatabase()
 }
 
 func dropDatabase() {
-	db.DropTableIfExists(&Beer{}, &Brewer{}, &Rank{}, "beer_brewers")
-	db.AutoMigrate(&Beer{}, &Brewer{}, &Rank{})
+	db.DropTableIfExists(&Beer{}, &Brewer{}, &Rank{}, "beer_brewers", &Session{}, &User{})
+	db.AutoMigrate(&Beer{}, &Brewer{}, &Rank{}, &Session{}, &User{})
 }
 
 func migrateDatabase() {
-	db.AutoMigrate(&Beer{}, &Brewer{}, &Rank{})
+	db.AutoMigrate(&Beer{}, &Brewer{}, &Rank{}, &Session{}, &User{})
 }
 
 func seedDatabase() {
@@ -123,4 +130,46 @@ func seedDatabase() {
 	for _, b := range beers {
 		db.Save(&b)
 	}
+
+	user := User{
+		Email:    "justin@mentallyfriendly.com",
+		Password: utils.StringPointer("password"),
+		Session: &Session{
+			Value:   uuid.NewV4().String(),
+			Expires: time.Now().Add(1 * time.Hour),
+		},
+	}
+
+	db.Save(&user)
+
+	// roles := []Role{
+	// 	Role{
+	// 		Name: "admin",
+	// 		Users: []User{
+	// 			User{
+	// 				Email:    "justin@mentallyfriendly.com",
+	// 				Password: utils.StringPointer("password"),
+	// 				Session: &Session{
+	// 					Value:   uuid.NewV4().String(),
+	// 					Expires: time.Now().Add(1 * time.Hour),
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	Role{
+	// 		Users: []User{
+	// 			User{
+	// 				Email: "justin@socialplayground.com",
+	// 				Session: &Session{
+	// 					Value:   uuid.NewV4().String(),
+	// 					Expires: time.Now().Add(1 * time.Hour),
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// }
+
+	// for _, role := range roles {
+	// 	db.Save(&role)
+	// }
 }

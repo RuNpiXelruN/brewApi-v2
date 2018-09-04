@@ -27,7 +27,7 @@ func UploadImage(image ReqImage) *utils.Result {
 	}
 
 	imgURL = imageURL.(string)
-	return dbSuccess(imgURL)
+	return dbSuccess(imgURL, nil)
 }
 
 func dbWithError(err error, code int, text string) *utils.Result {
@@ -39,12 +39,13 @@ func dbWithError(err error, code int, text string) *utils.Result {
 	return &result
 }
 
-func dbSuccess(data interface{}) *utils.Result {
+func dbSuccess(data interface{}, token *string) *utils.Result {
 	result := utils.Result{}
 
 	result.Success = &utils.Success{
 		StatusCode: http.StatusOK,
 		Data:       &data,
+		Token:      token,
 	}
 
 	return &result

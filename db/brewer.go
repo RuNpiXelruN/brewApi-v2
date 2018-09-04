@@ -17,7 +17,7 @@ func GetBrewerNames() *utils.Result {
 		return dbWithError(err, http.StatusInternalServerError, "Error fetching brewer names from DB")
 	}
 
-	return dbSuccess(&names)
+	return dbSuccess(&names, nil)
 }
 
 // GetBrewers func
@@ -34,7 +34,7 @@ func GetBrewers(limit, order, offset string) *utils.Result {
 		return dbWithError(err, http.StatusNotFound, "Error fetching brewers from DB")
 	}
 	tx.Commit()
-	return dbSuccess(brewers)
+	return dbSuccess(brewers, nil)
 }
 
 // GetBrewer func
@@ -64,12 +64,12 @@ func GetBrewer(id, includeBeers string) *utils.Result {
 			data["brewer"] = &brewer
 			data["beers"] = &beers
 
-			return dbSuccess(data)
+			return dbSuccess(data, nil)
 		}
 	}
 
 	tx.Commit()
-	return dbSuccess(&brewer)
+	return dbSuccess(&brewer, nil)
 }
 
 // CreateBrewer func
@@ -105,7 +105,7 @@ func CreateBrewer(first, last, feat, username, rnk, beerIDs string) *utils.Resul
 	}
 
 	tx.Commit()
-	return dbSuccess(&brewer)
+	return dbSuccess(&brewer, nil)
 }
 
 // UpdateBrewer func
@@ -177,7 +177,7 @@ func UpdateBrewer(id, first, last, ft, username, rnk, beerIDs string) *utils.Res
 	}
 
 	tx.Commit()
-	return dbSuccess(&brewer)
+	return dbSuccess(&brewer, nil)
 }
 
 // DeleteBrewer func
@@ -198,7 +198,7 @@ func DeleteBrewer(id string) *utils.Result {
 	}
 
 	tx.Commit()
-	return dbSuccess("Successfully deleted brewer from DB")
+	return dbSuccess("Successfully deleted brewer from DB", nil)
 }
 
 // GetRankedBrewers func
@@ -214,7 +214,7 @@ func GetRankedBrewers(level, limit, order, offset string) *utils.Result {
 		return dbWithError(err, http.StatusNotFound, "Error fetching beers from DB")
 	}
 
-	return dbSuccess(brewers)
+	return dbSuccess(brewers, nil)
 }
 
 // GetFeaturedBrewers func
@@ -228,7 +228,7 @@ func GetFeaturedBrewers(feat, limit, order string) *utils.Result {
 		return dbWithError(err, http.StatusNotFound, "Error fetching featured brewers from DB")
 	}
 
-	return dbSuccess(brewers)
+	return dbSuccess(brewers, nil)
 }
 
 // ************************************************************ UTILITY FUNCTIONS ************************************************************ //

@@ -10,6 +10,7 @@ type Result struct {
 type Success struct {
 	StatusCode int         `json:"status_code"`
 	Data       interface{} `json:"data"`
+	Token      *string     `json:"token"`
 }
 
 // Error type

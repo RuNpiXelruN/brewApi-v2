@@ -14,4 +14,4 @@ RUN godep restore
 RUN godep go build
 RUN go get -u github.com/pilu/fresh
 
-CMD fresh;
+CMD fresh -c fresh.conf;

@@ -13,6 +13,7 @@ var (
 	brewerController brewer
 	rankController   rank
 	utilsController  utilRoutes
+	authController   auth
 )
 
 // Startup func to register model routes
@@ -21,6 +22,7 @@ func Startup(r *mux.Router) {
 	brewerController.registerRoutes(r)
 	rankController.registerRoutes(r)
 	utilsController.registerRoutes(r)
+	authController.registerRoutes(r)
 }
 
 // Respond func
@@ -36,7 +38,24 @@ func Respond(w http.ResponseWriter, result *utils.Result) {
 
 	w.WriteHeader(result.Success.StatusCode)
 	w.Header().Set("Status", http.StatusText(result.Success.StatusCode))
+	w.Header().Set("Content-Type", "application/json")
+
+	if result.Success.Token != nil {
+		w.Header().Set("brew_token", *result.Success.Token)
+	}
 
 	data, _ := json.Marshal(result.Success.Data)
 	w.Write(data)
+}
+
+func dbSuccess(data interface{}, token *string) *utils.Result {
+	result := utils.Result{}
+
+	result.Success = &utils.Success{
+		StatusCode: http.StatusOK,
+		Data:       &data,
+		Token:      token,
+	}
+
+	return &result
 }

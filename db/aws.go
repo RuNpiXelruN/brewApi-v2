@@ -20,6 +20,7 @@ func s3ImageUpload(img ReqImage) (interface{}, error) {
 		return nil, err
 	}
 	defer newFile.Close()
+	defer os.Remove(newFile.Name())
 
 	_, err = io.Copy(newFile, img.File)
 	if err != nil {

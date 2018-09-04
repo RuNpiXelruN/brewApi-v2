@@ -3,12 +3,14 @@ services:
   db:
     image: postgres:9.6
     volumes:
-      - ./db/pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=brewsite_backend_v1
       - PGDATA=/data
+    ports:
+      - "5432:5432"
   api:
     build:
       context: .        

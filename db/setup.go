@@ -7,7 +7,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	// postgres connection
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/lib/pq"
 )
 
 var (

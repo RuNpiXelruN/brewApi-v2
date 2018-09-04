@@ -23,7 +23,7 @@ func GetBrewersOfRank(rnk, limit, order, offset string) *utils.Result {
 		return dbWithError(err, http.StatusNotFound, "Error fetching ranked brewers from db")
 	}
 
-	return dbSuccess(&rank)
+	return dbSuccess(&rank, nil)
 }
 
 // GetRanks func
@@ -34,5 +34,5 @@ func GetRanks(limit, order, offset string) *utils.Result {
 		return dbWithError(err, http.StatusInternalServerError, "Error fetching ranks from DB")
 	}
 
-	return dbSuccess(&ranks)
+	return dbSuccess(&ranks, nil)
 }

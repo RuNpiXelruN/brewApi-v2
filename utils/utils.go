@@ -23,3 +23,8 @@ func Respond(w http.ResponseWriter, result *Result) {
 	data, _ := json.Marshal(result.Success.Data)
 	w.Write(data)
 }
+
+// StringPointer func
+func StringPointer(s string) *string {
+	return &s
+}

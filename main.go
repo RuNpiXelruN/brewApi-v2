@@ -30,9 +30,9 @@ func main() {
 	api.Startup(s)
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedHeaders:   []string{"auth_token"},
+		AllowedOrigins:   []string{"http://localhost:8080"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowedHeaders:   []string{"brew_token"},
 		AllowCredentials: true,
 	})
 
@@ -45,5 +45,5 @@ func main() {
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprint(w, "Index Hit")
+	fmt.Fprintln(w, `<a href="/api/auth">Login/Signup</a>`)
 }
