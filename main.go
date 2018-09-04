@@ -4,17 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"go_apps/go_api_apps/brewApi-v2/api"
-	"go_apps/go_api_apps/brewApi-v2/config"
 	"go_apps/go_api_apps/brewApi-v2/db"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
-
-func init() {
-	config.SetVars()
-}
 
 func main() {
 	seed := flag.Bool("seed", false, "Include to seed the DB")

@@ -67,16 +67,16 @@ func (a auth) handleAuth(w http.ResponseWriter, req *http.Request) {
 	oauthStateString := uniuri.New()
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 
-	http.Redirect(w, req, url, http.StatusTemporaryRedirect)
+	// http.Redirect(w, req, url, http.StatusTemporaryRedirect)
 
-	// type urlData struct {
-	// 	URL string `json:"url"`
-	// }
-	// responseURL := urlData{
-	// 	URL: url,
-	// }
+	type urlData struct {
+		URL string `json:"url"`
+	}
+	responseURL := urlData{
+		URL: url,
+	}
 
-	// Respond(w, dbSuccess(responseURL, nil))
+	Respond(w, dbSuccess(responseURL, nil))
 }
 
 func alreadyLoggedIn(req *http.Request) (*utils.Result, bool) {
@@ -96,17 +96,34 @@ func alreadyLoggedIn(req *http.Request) (*utils.Result, bool) {
 
 func (a auth) authCallback(w http.ResponseWriter, req *http.Request) {
 	code := req.FormValue("code")
-	token, _ := googleOauthConfig.Exchange(oauth2.NoContext, code)
+	token, err := googleOauthConfig.Exchange(oauth2.NoContext, code)
+	if err != nil {
+		fmt.Println("Error:", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	res, err := http.Get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=` + token.AccessToken)
 	if err != nil {
 		fmt.Println("Error:", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 	defer res.Body.Close()
 
-	contents, _ := ioutil.ReadAll(res.Body)
+	contents, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error:", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	var user *googleUser
-	_ = json.Unmarshal(contents, &user)
+	if err = json.Unmarshal(contents, &user); err != nil {
+		fmt.Println("Error:", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	result := db.HandleAuthCallback(user.Email, w)
 	Respond(w, result)
