@@ -143,17 +143,6 @@ func CheckBeerNameUpdateIsUnique() utils.Adapter {
 
 // ******************************** AUTH MIDDLEWARE ******************************** //
 
-// CheckUserAuth func
-func CheckUserAuth() utils.Adapter {
-	return func(h http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, req *http.Request) {
-			log.Println("Auth Passed ☺")
-
-			h.ServeHTTP(w, req)
-		}
-	}
-}
-
 // SayHi func to test working middleware
 func SayHi() utils.Adapter {
 	return func(h http.HandlerFunc) http.HandlerFunc {

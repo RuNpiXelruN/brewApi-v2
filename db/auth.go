@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"go_apps/go_api_apps/brewApi-v2/utils"
 	"net/http"
 	"time"
@@ -30,6 +29,12 @@ func GetSessionUser(sessionValue string) (*User, *string, bool) {
 
 // HandleAuthCallback func
 func HandleAuthCallback(email string, w http.ResponseWriter) *utils.Result {
+
+	tokenHeader, err := utils.GetToken(email)
+	if err != nil {
+		return dbWithError(err, http.StatusInternalServerError, "Error creating jwt")
+	}
+
 	var user User
 	expires := time.Now().Add(1 * time.Hour)
 	sID := uuid.NewV4()
@@ -37,7 +42,7 @@ func HandleAuthCallback(email string, w http.ResponseWriter) *utils.Result {
 	// check if new user
 	if db.Model(&User{}).Preload("Session").Where("email = ?", email).Find(&user).RecordNotFound() {
 		user = User{
-			Email: email,
+			Email: &email,
 			Session: &Session{
 				Value:   sID.String(),
 				Expires: expires,
@@ -47,8 +52,7 @@ func HandleAuthCallback(email string, w http.ResponseWriter) *utils.Result {
 			return dbWithError(err, http.StatusInternalServerError, "Error saving new user to DB")
 		}
 
-		fmt.Println("new user created")
-		return dbSuccess(&user, utils.StringPointer(sID.String()))
+		return dbSuccess(&user, tokenHeader)
 	}
 
 	// otherwise existing user but no active cookie / session,
@@ -62,5 +66,5 @@ func HandleAuthCallback(email string, w http.ResponseWriter) *utils.Result {
 		return dbWithError(err, http.StatusInternalServerError, "Error replacing session in DB")
 	}
 
-	return dbSuccess(&user, utils.StringPointer(sID.String()))
+	return dbSuccess(&user, tokenHeader)
 }

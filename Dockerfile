@@ -8,7 +8,6 @@ WORKDIR /go/src/go_apps/go_api_apps/brewApi-v2
 
 ADD . .
 
-#RUN go install
 RUN go get -u github.com/tools/godep
 RUN godep restore
 RUN godep go build

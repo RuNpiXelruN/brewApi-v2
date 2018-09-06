@@ -36,13 +36,13 @@ func Respond(w http.ResponseWriter, result *utils.Result) {
 		return
 	}
 
-	w.WriteHeader(result.Success.StatusCode)
+	if result.Success.Token != nil {
+		w.Header().Set("BrewToken", *result.Success.Token)
+	}
+
 	w.Header().Set("Status", http.StatusText(result.Success.StatusCode))
 	w.Header().Set("Content-Type", "application/json")
-
-	if result.Success.Token != nil {
-		w.Header().Set("brew_token", *result.Success.Token)
-	}
+	w.WriteHeader(result.Success.StatusCode)
 
 	data, _ := json.Marshal(result.Success.Data)
 	w.Write(data)

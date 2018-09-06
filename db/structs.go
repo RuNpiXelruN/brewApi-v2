@@ -31,8 +31,8 @@ type Session struct {
 // User type
 type User struct {
 	ID        uint       `json:"id"`
-	Email     string     `json:"email" sql:"unique" gorm:"not null"`
-	Password  *string    `json:"password"`
+	Email     *string    `json:"email" sql:"unique" gorm:"not null"`
+	Password  *string    `json:"-"`
 	SessionID *uint      `json:"session_id"`
 	Session   *Session   `json:"session"`
 	Role      string     `json:"role" sql:"default:'basic'"`

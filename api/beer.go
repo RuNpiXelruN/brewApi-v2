@@ -14,14 +14,14 @@ import (
 type beer struct{}
 
 func (b beer) registerRoutes(r *mux.Router) {
-	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.getBeer)).Methods("GET")                                                                   // GET /beers/:id
-	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.updateBeer, db.CheckBeerNameUpdateIsUnique(), db.CheckUserAuth())).Methods("PUT", "PATCH") // PUT/PATCH /beers/:id
-	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.deleteBeer, db.CheckUserAuth())).Methods("DELETE")                                         // DELETE /beer/:id
-	r.Path("/beers").Queries("status", "{status:(?:upcoming|brewing|active|past)}").HandlerFunc(b.getBeersWithStatus).Methods("GET")                  // GET /beers?:status
-	r.Path("/beers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBeers).Methods("GET")                                  // GET /beers?:featured
-	r.Path("/beers/basic").HandlerFunc(b.getBasicBeers).Methods("GET")                                                                                // GET /beers/basic
-	r.Path("/beers").HandlerFunc(b.getBeers).Methods("GET")                                                                                           // GET /beers
-	r.Path("/beers").HandlerFunc(utils.Adapt(b.createBeer, db.CheckBeerNameIsUnique(), db.CheckUserAuth())).Methods("POST")                           // POST /beers
+	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.getBeer)).Methods("GET")                                                  // GET /beers/:id
+	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.updateBeer, utils.CheckToken())).Methods("PUT", "PATCH")                  // PUT/PATCH /beers/:id
+	r.Path("/beers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.deleteBeer, utils.CheckToken())).Methods("DELETE")                        // DELETE /beer/:id
+	r.Path("/beers").Queries("status", "{status:(?:upcoming|brewing|active|past)}").HandlerFunc(b.getBeersWithStatus).Methods("GET") // GET /beers?:status
+	r.Path("/beers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBeers).Methods("GET")                 // GET /beers?:featured
+	r.Path("/beers/basic").HandlerFunc(b.getBasicBeers).Methods("GET")                                                               // GET /beers/basic
+	r.Path("/beers").HandlerFunc(b.getBeers).Methods("GET")                                                                          // GET /beers
+	r.Path("/beers").HandlerFunc(utils.Adapt(b.createBeer, utils.CheckToken())).Methods("POST")                                      // POST /beers
 }
 
 // GET /beers/basic

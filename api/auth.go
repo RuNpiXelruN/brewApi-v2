@@ -38,12 +38,11 @@ var (
 )
 
 var googleOauthConfig = &oauth2.Config{
-	RedirectURL:  "http://localhost:8000/api/auth/callback",
+	RedirectURL:  "postmessage",
 	ClientID:     clientID,
 	ClientSecret: clientSecret,
 	Scopes: []string{
-		"https://www.googleapis.com/auth/userinfo.profile",
-		"https://www.googleapis.com/auth/userinfo.email",
+		"email",
 	},
 	Endpoint: google.Endpoint,
 }
@@ -67,16 +66,16 @@ func (a auth) handleAuth(w http.ResponseWriter, req *http.Request) {
 	oauthStateString := uniuri.New()
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 
-	// http.Redirect(w, req, url, http.StatusTemporaryRedirect)
+	http.Redirect(w, req, url, http.StatusTemporaryRedirect)
 
-	type urlData struct {
-		URL string `json:"url"`
-	}
-	responseURL := urlData{
-		URL: url,
-	}
+	// type urlData struct {
+	// 	URL string `json:"url"`
+	// }
+	// responseURL := urlData{
+	// 	URL: url,
+	// }
 
-	Respond(w, dbSuccess(responseURL, nil))
+	// Respond(w, dbSuccess(responseURL, nil))
 }
 
 func alreadyLoggedIn(req *http.Request) (*utils.Result, bool) {
@@ -98,30 +97,31 @@ func (a auth) authCallback(w http.ResponseWriter, req *http.Request) {
 	code := req.FormValue("code")
 	token, err := googleOauthConfig.Exchange(oauth2.NoContext, code)
 	if err != nil {
+		w.WriteHeader(401)
 		fmt.Println("Error:", err)
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	res, err := http.Get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=` + token.AccessToken)
 	if err != nil {
+		w.WriteHeader(401)
 		fmt.Println("Error:", err)
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	defer res.Body.Close()
 
 	contents, err := ioutil.ReadAll(res.Body)
 	if err != nil {
+		w.WriteHeader(401)
 		fmt.Println("Error:", err)
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	var user *googleUser
-	if err = json.Unmarshal(contents, &user); err != nil {
+	err = json.Unmarshal(contents, &user)
+	if err != nil {
+		w.WriteHeader(401)
 		fmt.Println("Error:", err)
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 

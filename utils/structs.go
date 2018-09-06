@@ -1,5 +1,7 @@
 package utils
 
+import jwt "github.com/dgrijalva/jwt-go"
+
 // Result type
 type Result struct {
 	Success *Success `json:"success"`
@@ -17,4 +19,10 @@ type Success struct {
 type Error struct {
 	StatusCode int    `json:"status_code"`
 	StatusText string `json:"error_text"`
+}
+
+// CustomClaims struct
+type CustomClaims struct {
+	Content interface{} `json:"content"`
+	jwt.StandardClaims
 }

@@ -27,7 +27,8 @@ func main() {
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8080"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
-		AllowedHeaders:   []string{"brew_token"},
+		AllowedHeaders:   []string{"BrewToken"},
+		ExposedHeaders:   []string{"BrewToken", "Status"},
 		AllowCredentials: true,
 	})
 

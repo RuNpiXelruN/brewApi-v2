@@ -132,7 +132,7 @@ func seedDatabase() {
 	}
 
 	user := User{
-		Email:    "justin@mentallyfriendly.com",
+		Email:    utils.StringPointer("justin@mentallyfriendly.com"),
 		Password: utils.StringPointer("password"),
 		Session: &Session{
 			Value:   uuid.NewV4().String(),
