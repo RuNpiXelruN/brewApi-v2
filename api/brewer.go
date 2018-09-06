@@ -2,6 +2,7 @@ package api
 
 import (
 	"go_apps/go_api_apps/brewApi-v2/db"
+	"go_apps/go_api_apps/brewApi-v2/utils"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,14 +12,13 @@ type brewer struct{}
 
 func (b brewer) registerRoutes(r *mux.Router) {
 	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.getBrewer).Methods("GET")                                               // GET /brewers/:id
-	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.deleteBrewer).Methods("DELETE")                                         // DELETE /brewers/:id
-	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(b.updateBrewer).Methods("PUT", "PATCH")                                   // PUT/PATCH /brewers/:id
+	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.deleteBrewer, utils.CheckToken())).Methods("DELETE")        // DELETE /brewers/:id
+	r.Path("/brewers/{id:[0-9]+}").HandlerFunc(utils.Adapt(b.updateBrewer, utils.CheckToken())).Methods("PUT", "PATCH")  // PUT/PATCH /brewers/:id
 	r.Path("/brewers/basic").HandlerFunc(b.getBrewerNames).Methods("GET")                                                // GET /brewers/basic
 	r.Path("/brewers").Queries("featured", "{featured:(?:true|false)}").HandlerFunc(b.getFeaturedBrewers).Methods("GET") // GET /brewers?:featured
 	r.Path("/brewers").Queries("rank", "{rank:[1-8]}").HandlerFunc(b.getRankedBrewers).Methods("GET")                    // GET /brewers/:rank
 	r.Path("/brewers").HandlerFunc(b.getBrewers).Methods("GET")                                                          // GET /brewers
-	r.Path("/brewers").HandlerFunc(b.createBrewer).Methods("POST")                                                       // POST /brewers
-	// r.Path("/brewers").HandlerFunc(utils.Adapt(b.createBrewer, db.CheckBrewerUsernameIsUnique(), db.CheckPresenceOfFirstNameOrUsername())).Methods("POST") // POST /brewers
+	r.Path("/brewers").HandlerFunc(utils.Adapt(b.createBrewer, utils.CheckToken())).Methods("POST")                      // POST /brewers
 }
 
 // GET /brewers/basic

@@ -4,17 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"go_apps/go_api_apps/brewApi-v2/api"
-	"go_apps/go_api_apps/brewApi-v2/config"
 	"go_apps/go_api_apps/brewApi-v2/db"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
-
-func init() {
-	config.SetVars()
-}
 
 func main() {
 	seed := flag.Bool("seed", false, "Include to seed the DB")
@@ -30,9 +25,10 @@ func main() {
 	api.Startup(s)
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedHeaders:   []string{"auth_token"},
+		AllowedOrigins:   []string{"http://localhost:8080"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowedHeaders:   []string{"BrewToken"},
+		ExposedHeaders:   []string{"BrewToken", "Status"},
 		AllowCredentials: true,
 	})
 
@@ -45,5 +41,5 @@ func main() {
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprint(w, "Index Hit")
+	fmt.Fprintln(w, `<a href="/api/auth">Login/Signup</a>`)
 }

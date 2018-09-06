@@ -17,6 +17,40 @@ type BasicBrewer struct {
 	LastName  string `json:"last_name"`
 }
 
+// Session type
+type Session struct {
+	ID        uint       `json:"id"`
+	Value     string     `json:"value"`
+	Expires   time.Time  `json:"-"`
+	User      *User      `json:"user"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
+}
+
+// User type
+type User struct {
+	ID        uint       `json:"id"`
+	Email     *string    `json:"email" sql:"unique" gorm:"not null"`
+	Password  *string    `json:"-"`
+	SessionID *uint      `json:"session_id"`
+	Session   *Session   `json:"session"`
+	Role      string     `json:"role" sql:"default:'basic'"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
+}
+
+// Role type
+// type Role struct {
+// 	ID        uint       `json:"id"`
+// 	Name      string     `json:"name" sql:"default:'user'"`
+// 	Users     []User     `json:"users"`
+// 	CreatedAt time.Time  `json:"-"`
+// 	UpdatedAt time.Time  `json:"-"`
+// 	DeletedAt *time.Time `json:"-"`
+// }
+
 // Beer struct
 type Beer struct {
 	ID             uint       `json:"id"`
